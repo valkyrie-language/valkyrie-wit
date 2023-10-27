@@ -15,6 +15,7 @@ exclude = ["package.json", "tests/**"]
 crate-type = ["cdylib"]
 
 [dependencies]
+wit-bindgen = "0.13.0"
 
 [dev-dependencies]
 

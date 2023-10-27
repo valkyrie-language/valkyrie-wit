@@ -1,0 +1,10 @@
+package vit:core
+
+world core {
+  import wasi:filesystem/filesystem;
+  import wasi:random/random;
+  
+  import print: func(msg: string)
+
+  export run: func()
+}
