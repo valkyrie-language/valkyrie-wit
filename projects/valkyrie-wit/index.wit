@@ -1,0 +1,25 @@
+// auto-generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (cargo-witgen v0.15.0) 
+
+/// Doc strings are supported!
+record test-struct {
+  /// Even for fields!
+  inner: string
+}
+
+variant test-enum {
+  void,
+  number(u64),
+  string-variant(string),
+}
+
+test: func(other: list<u8>, test-struct: test-struct, other-enum: test-enum) -> expected<tuple<string, s64>, string>
+
+resource a-resource {
+  /// Can convert custom attributes to doc strings
+  ///@custom_attribute
+  foo: func()
+  /// Have special mutable attribute
+  ///@mutable
+  faa: func()
+  static fee: func()
+}

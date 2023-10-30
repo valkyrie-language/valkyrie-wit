@@ -4,26 +4,40 @@
 #![doc(html_logo_url = "https://raw.githubusercontent.com/oovm/shape-rs/dev/projects/images/Trapezohedron.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/oovm/shape-rs/dev/projects/images/Trapezohedron.svg")]
 
-wit_bindgen::generate!({
-    // the name of the world in the `*.wit` input file
-    world: "host",
 
-    // For all exported worlds, interfaces, and resources, this specifies what
-    // type they're corresponding to in this module. In this case the `MyHost`
-    // struct defined below is going to define the exports of the `world`,
-    // namely the `run` function.
-    exports: {
-        world: MyHost,
-    },
-});
+use witgen::witgen;
 
-// Define a custom type and implement the generated `Guest` trait for it which
-// represents implementing all the necessary exported interfaces for this
-// component.
-struct MyHost;
+// #[witgen]
+// use other_crate::*;
 
-impl Guest for MyHost {
-    fn run() {
-        print("Hello, world!");
-    }
+/// Doc strings are supported!
+#[witgen]
+struct TestStruct {
+    /// Even for fields!
+    inner: String,
+}
+
+#[witgen]
+enum TestEnum {
+    Void,
+    Number(u64),
+    StringVariant(String),
+}
+
+#[witgen]
+fn test(other: Vec<u8>, test_struct: TestStruct, other_enum: TestEnum) -> Result<(String, i64), String> {
+    // The following code is not part of the generated `.wit` file.
+    // You may add an example implementation or just satisfy the compiler with a `todo!()`.
+    Ok((String::from("test"), 0i64))
+}
+
+#[witgen]
+impl AResource {
+    /// Can convert custom attributes to doc strings
+    #[custom_attribute]
+    pub fn foo(&self) {}
+    /// Have special mutable attribute
+    pub fn faa(&mut self) {}
+
+    pub fn fee() {}
 }
