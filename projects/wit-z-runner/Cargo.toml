@@ -1,0 +1,23 @@
+[package]
+name = "wit-test"
+publish = false
+version = "0.0.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+
+[dependencies.wasmtime]
+version = "14.0.3"
+features = ["component-model"]
+
+[dev-dependencies]
+
+[features]
+default = []
+
+[package.metadata.docs.rs]
+all-features = true
+

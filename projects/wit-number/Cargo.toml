@@ -1,5 +1,6 @@
 [package]
-name = "valkyrie-wit"
+name = "wit-number"
+publish = false
 version = "0.0.0"
 authors = ["Aster <192607617@qq.com>"]
 description = "..."
