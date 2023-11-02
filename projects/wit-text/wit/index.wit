@@ -1,13 +1,5 @@
-package vit:number
+package vit:text
 
-world number-ffi {
-     include integer-ffi;
-     include decimal-ffi;
-     include fraction-ffi;
-     include prime-ffi;
-//    import wasi:filesystem/filesystem;
-//    import wasi:http/handler@1.0.0;
-//    export wasi:http/handler@1.0.0; wit add wasi:filesystem
-//    import print: func(msg: string)
-//    import self/def-integer
+world text-ffi {
+     include utf8-ffi;
 }

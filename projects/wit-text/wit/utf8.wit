@@ -1,0 +1,15 @@
+package vit:text
+
+
+interface utf8 {
+    record unicode {
+        codepoint: u32,
+    }
+    resource utf8-text {
+        get-char-offset: func(offset:u32) -> option<unicode>
+    }
+}
+
+world utf8-ffi {
+    export utf8
+}

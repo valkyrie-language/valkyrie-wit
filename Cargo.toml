@@ -2,8 +2,9 @@
 resolver = "2"
 members = ["projects/*"]
 default-members = [
-    "projects/wit-image",
     "projects/wit-number",
+    "projects/wit-text",
+    "projects/wit-image",
 ]
 exclude = [
     "projects/wit-z-runner",

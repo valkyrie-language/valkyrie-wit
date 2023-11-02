@@ -1,0 +1,16 @@
+package vit:text
+
+
+interface ascii {
+    record ascii {
+        codepoint: u8,
+    }
+
+    resource ascii-text {
+        get-char-offset: func(offset: u32) -> option<ascii>
+    }
+}
+
+world ascii-ffi {
+    export ascii
+}
