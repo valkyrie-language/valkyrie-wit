@@ -1,4 +1,4 @@
-package vit:core
+package vit:native
 
 interface decimal {
     /// unsigned integer buffer

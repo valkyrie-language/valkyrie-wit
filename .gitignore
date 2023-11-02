@@ -12,4 +12,7 @@ time-travel.*
 # Rust
 target/
 Cargo.lock
+
+# wasm
+*.wasm
 wasi_snapshot_preview1.wasm

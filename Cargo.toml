@@ -2,7 +2,8 @@
 resolver = "2"
 members = ["projects/*"]
 default-members = [
-    "projects/valkyrie-wit",
+    "projects/wit-image",
+    "projects/wit-number",
 ]
 exclude = [
     "projects/.DS_Store",

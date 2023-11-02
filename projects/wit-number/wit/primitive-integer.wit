@@ -1,0 +1,45 @@
+package vit:native
+
+interface natural {
+    /// unsigned integer buffer
+    resource natural {
+        constructor(init: list<u32>);
+        add-u32: func(rhs: u32) -> natural
+        add-u64: func(rhs: u64) -> natural
+        add-nat: func(rhs: borrow<natural>) -> natural
+    }
+}
+
+interface integer {
+    use natural.{natural};
+    variant sign {
+        unsign,
+        positive,
+        negative
+    }
+    record integer {
+        sign: sign,
+        digits: natural
+    }
+    // %[method] integer.add-u32
+    // add area
+    add-u32: func(self: integer, rhs: u32) -> integer;
+    add-u64: func(self: integer, rhs: u64) -> integer;
+    add-nat: func(self: integer, rhs: borrow<natural>) -> integer;
+    add-i32: func(self: integer, rhs: s32) -> integer;
+    add-i64: func(self: integer, rhs: s64) -> integer;
+    add-int: func(self: integer, rhs: integer) -> integer;
+    // sub area
+    sub-u32: func(self: integer, rhs: u32) -> integer;
+    sub-u64: func(self: integer, rhs: u64) -> integer;
+    sub-nat: func(self: integer, rhs: borrow<natural>) -> integer;
+    sub-i32: func(self: integer, rhs: s32) -> integer;
+    sub-i64: func(self: integer, rhs: s64) -> integer;
+    sub-int: func(self: integer, rhs: integer) -> integer;
+}
+
+
+world integer-ffi {
+    export natural
+    export integer
+}

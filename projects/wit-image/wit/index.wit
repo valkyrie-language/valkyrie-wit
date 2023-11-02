@@ -1,6 +1,6 @@
-package vit:core
+package vit:native
 
-world ffi {
+world native-ffi {
      include integer-ffi;
      include decimal-ffi;
 //    import wasi:filesystem/filesystem;

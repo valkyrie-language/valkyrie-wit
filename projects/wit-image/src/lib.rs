@@ -9,15 +9,15 @@ mod primitive;
 pub use crate::primitive::{NaturalHost, DecimalHost, IntegerHost};
 
 wit_bindgen::generate!({
-    world: "ffi",
+    world: "native-ffi",
 
     // For all exported worlds, interfaces, and resources, this specifies what
     // type they're corresponding to in this module. In this case the `MyHost`
     // struct defined below is going to define the exports of the `world`,
     // namely the `run` function.
     exports: {
-        "vit:core/natural/natural": NaturalHost,
-        "vit:core/decimal": DecimalHost,
-        "vit:core/integer": IntegerHost,
+        "vit:native/natural/natural": NaturalHost,
+        "vit:native/decimal": DecimalHost,
+        "vit:native/integer": IntegerHost,
     },
 });
