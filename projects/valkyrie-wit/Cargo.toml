@@ -10,13 +10,16 @@ license = "MPL-2.0"
 edition = "2021"
 exclude = ["package.json", "tests/**"]
 
+[lib]
+crate-type = ["cdylib"]
+
 [dependencies]
-witgen = "0.15.0"
+#witgen = "0.15.0"
 #anyhow = "1.0.75"
 #wit = "0.2.1"
 #wasmer = "4.2.3"
-#wit-bindgen = "0.13.0"
-#wit-component = "0.16.0"
+wit-bindgen = "0.13.0"
+#wit-component = "0.17.0"
 
 
 [dev-dependencies]
@@ -26,3 +29,4 @@ default = []
 
 [package.metadata.docs.rs]
 all-features = true
+
