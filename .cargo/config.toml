@@ -1,6 +1,3 @@
 [build]
 target = "wasm32-wasi"
 default-target = "wasm32-wasi"
-
-#[target.wasm32-wasi]
-#linker = "wasm-ld"

@@ -6,6 +6,7 @@ default-members = [
     "projects/wit-number",
 ]
 exclude = [
+    "projects/wit-z-runner",
     "projects/.DS_Store",
 ]
 
