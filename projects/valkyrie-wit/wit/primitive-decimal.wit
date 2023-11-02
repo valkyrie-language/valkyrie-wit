@@ -1,24 +1,20 @@
 package vit:core
 
-interface integer {
+interface decimal {
     /// unsigned integer buffer
-    record unsigned {
+    record decimal {
         x: list<u32>,
     }
-    add-u32: func(rhs: u32) -> unsigned
-    add-u64: func(rhs: u64) -> unsigned
+    add-f32: func(rhs: float32) -> decimal
+    add-f64: func(rhs: float64) -> decimal
 
-    resource integer {
-        /// Can convert custom attributes to doc strings
-        ///@custom_attribute
-        foo: func()
-        /// Have special mutable attribute
-        ///@mutable
-        faa: func()
-        // static fee: func()
-    }
+
+
+    // export run: func()
 }
 
-world integer-ffi {
-    export integer
+world decimal-ffi {
+    export decimal
 }
+
+
