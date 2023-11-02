@@ -15,9 +15,10 @@ exclude = ["package.json", "tests/**"]
 crate-type = ["cdylib"]
 
 [dependencies]
-rand = { version = "0.8.5", features = ["small_rng"] }
-fastrand = "2.0.1"
-num-bigint = { version = "0.4.4", features = ["rand"] }
+#rand_core = "0.6.4"
+#fastrand = { version = "2.0.1" }
+num-traits = "0.2.17"
+num-bigint = "0.4.4"
 wit-bindgen = "0.13.0"
 
 

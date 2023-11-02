@@ -1,13 +1,10 @@
 package vit:number
 
-interface decimal {
+interface prime {
     /// unsigned integer buffer
     record decimal {
         x: list<u32>,
     }
-    add-f32: func(rhs: float32) -> decimal
-    add-f64: func(rhs: float64) -> decimal
-
 
 
     // export run: func()

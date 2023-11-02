@@ -6,6 +6,7 @@
 
 extern crate core;
 
+mod helper;
 mod hosts;
 pub use crate::hosts::{DecimalHost, FractionHost, IntegerHost, NaturalHost};
 

@@ -17,3 +17,5 @@ const wasm = await WebAssembly.compile(
 const instance = await WebAssembly.instantiate(wasm, wasi.getImportObject());
 
 wasi.start(instance);
+
+

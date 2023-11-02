@@ -6,23 +6,30 @@ interface natural {
     /// unsigned integer buffer
     resource natural {
         constructor(init: list<u32>);
-        new-random: func(min: natural, max: natural, seed: u64) -> natural;
+        zero: static func() -> natural
+        one: static func() -> natural
+
         add-u32: func(rhs: u32) -> natural
         add-u64: func(rhs: u64) -> natural
         add-nat: func(rhs: borrow<natural>) -> natural
+
+        iter-has-next: func(self: borrow<natural>) -> bool
+        iter-has-prev: func(self: borrow<natural>) -> bool
+        iter-next: func(self: borrow<natural>) -> option<natural>
+        iter-prev: func(self: borrow<natural>) -> option<natural>
     }
 }
 
 interface integer {
     use natural.{natural};
-    variant sign {
+    enum sign {
         un-sign,
         positive,
         negative
     }
     record integer {
         sign: sign,
-        digits: natural
+        natural: natural
     }
     // %[method] integer.add-u32
     // add area
@@ -39,13 +46,16 @@ interface integer {
     sub-i32: func(self: integer, rhs: s32) -> integer;
     sub-i64: func(self: integer, rhs: s64) -> integer;
     sub-int: func(self: integer, rhs: integer) -> integer;
-
-
 }
 
+interface ordinal {
+    record ordinal {
+        natural: natural
+    }
+}
 
 world integer-ffi {
-    import wasi:random/random;
     export natural
     export integer
+    export ordinal
 }
