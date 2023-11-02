@@ -5,6 +5,7 @@ use crate::exports::vit::number::{
     natural::{GuestNatural, OwnNatural},
 };
 use num_bigint::{BigInt, BigUint};
+use num_traits::Zero;
 use std::ops::Add;
 use wit_bindgen::Resource;
 mod impl_dec;

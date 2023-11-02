@@ -4,13 +4,13 @@ use std::ops::Sub;
 
 impl From<Integer> for BigInt {
     fn from(value: Integer) -> Self {
-        BigInt::from_biguint(value.sign.into(), value.digits.owned.clone())
+        BigInt::from_biguint(value.sign.into(), value.natural.owned.clone())
     }
 }
 
 impl From<BigInt> for Integer {
     fn from(value: BigInt) -> Self {
-        Self { sign: value.sign().into(), digits: Resource::new(NaturalHost { owned: value.magnitude().clone() }) }
+        Self { sign: value.sign().into(), natural: Resource::new(NaturalHost { owned: value.magnitude().clone() }) }
     }
 }
 

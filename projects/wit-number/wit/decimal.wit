@@ -6,8 +6,8 @@ interface decimal {
         x: list<u32>,
     }
 
-
-    // export run: func()
+    add-f32: func(self: decimal, rhs: float32) -> decimal;
+    add-f64: func(self: decimal, rhs: float64) -> decimal;
 }
 
 world decimal-ffi {
