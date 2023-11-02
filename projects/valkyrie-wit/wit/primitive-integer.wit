@@ -1,0 +1,18 @@
+package vit:core
+
+interface decimal {
+    /// unsigned integer buffer
+    record decimal {
+        x: list<u32>,
+    }
+    add-u32: func(rhs: u32) -> decimal
+    add-u64: func(rhs: u64) -> decimal
+
+
+
+    // export run: func()
+}
+
+world decimal-ffi {
+    export decimal
+}

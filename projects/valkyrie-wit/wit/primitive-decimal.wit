@@ -1,0 +1,24 @@
+package vit:core
+
+interface integer {
+    /// unsigned integer buffer
+    record unsigned {
+        x: list<u32>,
+    }
+    add-u32: func(rhs: u32) -> unsigned
+    add-u64: func(rhs: u64) -> unsigned
+
+    resource integer {
+        /// Can convert custom attributes to doc strings
+        ///@custom_attribute
+        foo: func()
+        /// Have special mutable attribute
+        ///@mutable
+        faa: func()
+        // static fee: func()
+    }
+}
+
+world integer-ffi {
+    export integer
+}
