@@ -12,11 +12,6 @@ interface natural {
         add-u32: func(rhs: u32) -> natural
         add-u64: func(rhs: u64) -> natural
         add-nat: func(rhs: borrow<natural>) -> natural
-
-        iter-has-next: func(self: borrow<natural>) -> bool
-        iter-has-prev: func(self: borrow<natural>) -> bool
-        iter-next: func(self: borrow<natural>) -> option<natural>
-        iter-prev: func(self: borrow<natural>) -> option<natural>
     }
 }
 
@@ -50,8 +45,12 @@ interface integer {
 
 interface ordinal {
     record ordinal {
-        natural: natural
+        // non zero
+        integer: integer
     }
+
+    new: func(integer: integer) -> option<ordinal>;
+    uncheck-new: func(integer: integer) -> ordinal;
 }
 
 world integer-ffi {

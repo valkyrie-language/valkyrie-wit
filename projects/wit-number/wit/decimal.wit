@@ -1,6 +1,6 @@
 package vit:number
 
-interface prime {
+interface decimal {
     /// unsigned integer buffer
     record decimal {
         x: list<u32>,

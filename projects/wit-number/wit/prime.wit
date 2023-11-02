@@ -12,13 +12,11 @@ interface prime {
 
     iter-has-next: func(self: prime) -> bool
     iter-has-prev: func(self: prime) -> bool
-    iter-next: func(self: prime) -> option<prime>
-    iter-prev: func(self: prime) -> option<prime>
+    iter-next: func(self: prime) -> prime
+    iter-prev: func(self: prime) -> prime
 
-    around-prev: func(n: natural) -> option<prime>
+    around-prev: func(n: natural) -> prime
     around-next: func(n: natural) -> prime
-
-
 }
 
 world prime-ffi {
