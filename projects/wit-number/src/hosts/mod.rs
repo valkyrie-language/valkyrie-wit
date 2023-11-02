@@ -1,58 +1,24 @@
-use crate::exports::vit::number::{decimal, integer};
-use crate::exports::vit::number::decimal::Decimal;
-use crate::exports::vit::number::integer::{Integer, Natural};
-use crate::exports::vit::number::natural::{GuestNatural, OwnNatural};
+use crate::exports::vit::number::{
+    decimal,
+    decimal::Decimal,
+    integer::{Integer, Natural, Sign},
+    natural::{GuestNatural, OwnNatural},
+};
+use num_bigint::{BigInt, BigUint};
+use std::ops::Add;
+use wit_bindgen::Resource;
 
-pub struct NaturalHost;
+mod impl_int;
+mod impl_nat;
+mod impl_sign;
 
-impl GuestNatural for NaturalHost {
-    fn new(init: Vec<u32>) -> Self {
-        todo!()
-    }
-
-    fn add_u32(&self, rhs: u32) -> OwnNatural {
-        todo!()
-    }
-
-    fn add_u64(&self, rhs: u64) -> OwnNatural {
-        todo!()
-    }
-
-    fn add_nat(&self, rhs: &NaturalHost) -> OwnNatural {
-        todo!()
-    }
+pub struct NaturalHost {
+    owned: BigUint,
 }
 
+pub struct IntegerHost {}
 
-pub struct IntegerHost;
-
-impl integer::Guest for IntegerHost {
-    fn add_u32(self_: Integer, rhs: u32) -> Integer {
-        todo!()
-    }
-
-    fn add_u64(self_: Integer, rhs: u64) -> Integer {
-        todo!()
-    }
-
-    fn add_nat(self_: Integer, rhs: &Natural) -> Integer {
-        todo!()
-    }
-
-    fn add_i32(self_: Integer, rhs: i32) -> Integer {
-        todo!()
-    }
-
-    fn add_i64(self_: Integer, rhs: i64) -> Integer {
-        todo!()
-    }
-
-    fn add_int(self_: Integer, rhs: Integer) -> Integer {
-        todo!()
-    }
-}
-
-pub struct DecimalHost;
+pub struct DecimalHost {}
 
 impl decimal::Guest for DecimalHost {
     fn add_f32(rhs: f32) -> Decimal {

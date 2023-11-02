@@ -3,6 +3,7 @@ package vit:number
 world number-ffi {
      include integer-ffi;
      include decimal-ffi;
+     include fraction-ffi;
 //    import wasi:filesystem/filesystem;
 //    import wasi:random/random;
 //    import wasi:http/handler@1.0.0;

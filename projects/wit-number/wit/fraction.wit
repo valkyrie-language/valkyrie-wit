@@ -1,22 +1,8 @@
 package vit:number
 
-interface natural {
-    /// unsigned integer buffer
-    resource natural {
-        constructor(init: list<u32>);
-        add-u32: func(rhs: u32) -> natural
-        add-u64: func(rhs: u64) -> natural
-        add-nat: func(rhs: borrow<natural>) -> natural
-    }
-}
 
-interface integer {
-    use natural.{natural};
-    variant sign {
-        un-sign,
-        positive,
-        negative
-    }
+interface fraction {
+    use integer.{sign};
     record integer {
         sign: sign,
         digits: natural
@@ -38,8 +24,6 @@ interface integer {
     sub-int: func(self: integer, rhs: integer) -> integer;
 }
 
-
-world integer-ffi {
-    export natural
-    export integer
+world fraction-ffi {
+    export fraction
 }

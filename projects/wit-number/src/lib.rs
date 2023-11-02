@@ -5,6 +5,8 @@
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/oovm/shape-rs/dev/projects/images/Trapezohedron.svg")]
 
 
+extern crate core;
+
 mod hosts;
 pub use crate::hosts::{NaturalHost, DecimalHost, IntegerHost};
 

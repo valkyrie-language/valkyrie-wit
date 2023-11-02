@@ -20,3 +20,5 @@ default = []
 [package.metadata.docs.rs]
 all-features = true
 
+[package.metadata.cargo-wasi]
+default-args = ["build", "--target", "wasm32-wasi"]
