@@ -1,0 +1,25 @@
+package vit:number
+
+interface prime {
+    use ordinal.{ordinal, natural};
+    /// unsigned integer buffer
+    record prime {
+        ordinal: ordinal
+    }
+
+    new: func(ordinal: ordinal) -> prime
+
+    check-nat: func(n: natural) -> bool
+
+    iter-next: func(self: prime) -> prime
+    iter-prev: func(self: prime) -> prime
+
+    around-prev: func(n: natural) -> prime
+    around-next: func(n: natural) -> prime
+}
+
+world prime-ffi {
+    export prime
+}
+
+

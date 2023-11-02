@@ -1,0 +1,17 @@
+package vit:number
+
+interface decimal {
+    /// unsigned integer buffer
+    record decimal {
+        x: list<u32>,
+    }
+
+    add-f32: func(self: decimal, rhs: float32) -> decimal;
+    add-f64: func(self: decimal, rhs: float64) -> decimal;
+}
+
+world decimal-ffi {
+    export decimal
+}
+
+
