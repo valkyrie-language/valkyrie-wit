@@ -8,13 +8,15 @@ extern crate core;
 
 mod helper;
 mod hosts;
-pub use crate::hosts::{DecimalHost, FractionHost, IntegerHost, NaturalHost};
+pub use crate::hosts::{DecimalHost, FractionHost, IntegerHost, NaturalHost, OrdinalHost, PrimeHost};
 
 wit_bindgen::generate!({
     world: "number-ffi",
     exports: {
         "vit:number/natural/natural": NaturalHost,
         "vit:number/integer": IntegerHost,
+        "vit:number/ordinal": OrdinalHost,
+        "vit:number/prime": PrimeHost,
         "vit:number/fraction": FractionHost,
         "vit:number/decimal": DecimalHost,
     },

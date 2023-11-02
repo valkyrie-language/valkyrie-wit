@@ -24,3 +24,7 @@ pub struct IntegerHost {}
 pub struct DecimalHost {}
 
 pub struct FractionHost {}
+
+pub struct OrdinalHost {}
+
+pub struct PrimeHost {}

@@ -44,6 +44,7 @@ interface integer {
 }
 
 interface ordinal {
+    use integer.{integer, natural};
     record ordinal {
         // non zero
         integer: integer
