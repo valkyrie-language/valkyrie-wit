@@ -8,11 +8,12 @@ extern crate core;
 
 mod helper;
 mod hosts;
-pub use crate::hosts::{AsciiHost, DecimalHost, FractionHost, IntegerHost, NaturalHost, UTF8Host};
+pub use crate::hosts::{AsciiHost, IntegerHost, NaturalHost, UTF16Host, UTF8Host, Utf32Host};
 
 wit_bindgen::generate!({
     world: "text-ffi",
     exports: {
-        "vit:text/utf8": UTF8Host,
+        "vit:text/ascii/ascii-text": UTF8Host,
+        "vit:text/utf8/utf8-text": UTF8Host,
     },
 });
