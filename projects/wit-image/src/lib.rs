@@ -4,20 +4,19 @@
 #![doc(html_logo_url = "https://raw.githubusercontent.com/oovm/shape-rs/dev/projects/images/Trapezohedron.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/oovm/shape-rs/dev/projects/images/Trapezohedron.svg")]
 
-
 mod primitive;
 pub use crate::primitive::{NaturalHost, DecimalHost, IntegerHost};
 
 wit_bindgen::generate!({
-    world: "native-ffi",
+    world: "image-ffi",
 
     // For all exported worlds, interfaces, and resources, this specifies what
     // type they're corresponding to in this module. In this case the `MyHost`
     // struct defined below is going to define the exports of the `world`,
     // namely the `run` function.
     exports: {
-        "vit:native/natural/natural": NaturalHost,
-        "vit:native/decimal": DecimalHost,
-        "vit:native/integer": IntegerHost,
+        // "vit:number/natural/natural": NaturalHost,
+        // "vit:number/decimal": DecimalHost,
+        // "vit:number/integer": IntegerHost,
     },
 });

@@ -1,12 +1,5 @@
-package vit:number
+package vit:image
 
-world number-ffi {
-     include integer-ffi;
-     include decimal-ffi;
-//    import wasi:filesystem/filesystem;
-//    import wasi:random/random;
-//    import wasi:http/handler@1.0.0;
-//    export wasi:http/handler@1.0.0; wit add wasi:filesystem
-//    import print: func(msg: string)
-//    import self/def-integer
+world image-ffi {
+     include rgba-ffi;
 }

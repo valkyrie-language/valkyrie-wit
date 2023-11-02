@@ -1,7 +1,7 @@
-use crate::exports::vit::native::{decimal, integer};
-use crate::exports::vit::native::decimal::Decimal;
-use crate::exports::vit::native::integer::{Integer, Natural};
-use crate::exports::vit::native::natural::{GuestNatural, OwnNatural};
+use crate::exports::vit::number::{decimal, integer};
+use crate::exports::vit::number::decimal::Decimal;
+use crate::exports::vit::number::integer::{Integer, Natural};
+use crate::exports::vit::number::natural::{GuestNatural, OwnNatural};
 
 pub struct NaturalHost;
 

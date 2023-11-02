@@ -1,0 +1,18 @@
+package vit:image
+
+interface rgba-image {
+    record rgba-pixel {
+        r: u8,
+        g: u8,
+        b: u8,
+        a: u8,
+    }
+    /// unsigned integer buffer
+    resource rgba-image {
+        constructor(init: list<u32>);
+    }
+}
+
+world rgba-ffi {
+    export rgba-image
+}
