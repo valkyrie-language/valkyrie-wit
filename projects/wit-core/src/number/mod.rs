@@ -14,6 +14,7 @@
 // mod impl_int;
 pub mod natural;
 
+pub mod integer;
 // pub struct NaturalHost {
 //     owned: BigUint,
 // }

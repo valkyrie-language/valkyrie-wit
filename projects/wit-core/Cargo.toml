@@ -16,6 +16,7 @@ crate-type = ["cdylib"]
 [dependencies]
 rand = "0.8.5"
 num = { version = "0.4.1", features = ["rand"] }
+image = "0.24.7"
 wit-bindgen = "0.13.0"
 
 
