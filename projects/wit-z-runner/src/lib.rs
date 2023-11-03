@@ -4,6 +4,7 @@
 #![doc(html_logo_url = "https://raw.githubusercontent.com/oovm/shape-rs/dev/projects/images/Trapezohedron.svg")]
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/oovm/shape-rs/dev/projects/images/Trapezohedron.svg")]
 
+use itertools::Itertools;
 use std::{
     borrow::{Borrow, BorrowMut},
     collections::BTreeMap,
@@ -59,15 +60,15 @@ impl ValkyrieVM {
         self.linker.module(&mut self.store, module, &load)?;
         Ok(())
     }
-    pub fn log_linked(&mut self) {
-        let width = self.linker.iter(&mut self.store).map(|(module, name, _)| module.len() + name.len() + 2).max().unwrap_or(0);
-        for (module, name, function) in self.linker.iter(&mut self.store) {
-            print!(
-                "{module}:{name}{padding}=> ",
-                module = module,
-                name = name,
-                padding = " ".repeat(width - module.len() - name.len() - 2)
-            );
+    pub fn logging_linked(&mut self) {
+        let mut pad1 = 0;
+        let mut pad2 = 0;
+        for (module, name, _) in self.linker.iter(&mut self.store) {
+            pad1 = std::cmp::max(pad1, module.len());
+            pad2 = std::cmp::max(pad2, name.len());
+        }
+        for (module, name, function) in self.linker.iter(&mut self.store).sorted_by_key(|v| (v.0, v.1)) {
+            print!("{module:<pad1$}  {name:<pad2$} => ", pad1 = pad1, pad2 = pad2);
             match function {
                 Extern::Func(v) => println!("{v:?}"),
                 Extern::Global(v) => println!("{v:?}"),
@@ -109,7 +110,7 @@ pub enum ValkyrieValue {
 fn main1() -> Result<()> {
     let mut vm = ValkyrieVM::new();
     vm.load_binary("native", include_bytes!("../tests/wit_number.wasm"))?;
-    vm.log_linked();
+    vm.logging_linked();
 
     let str_ptr = vm.call_ffi_low("native", "v:number/integer#[method]new", &[])?;
     let char_ptr1 = vm.call_ffi_low("native", "v:number/integer#[method]add-u32", &[str_ptr[0].clone(), Val::I64(0)])?;
