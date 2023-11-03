@@ -18,7 +18,7 @@ impl Utf8Text {
 }
 
 impl Utf8Text {
-    #[export_name = "text/Utf8Text#[method]new"]
+    #[export_name = "text_ffi/Utf8Text#[method]new"]
     unsafe extern "C" fn new() -> isize {
         let rust_string = "Hello, world!".to_string();
         let ptr = rust_string.as_ptr();
@@ -27,7 +27,7 @@ impl Utf8Text {
     }
 
     /// this: (&str, u64) -> option<unicode>
-    #[export_name = "text/Utf8Text#[method]get-char-nth"]
+    #[export_name = "text_ffi/Utf8Text#[method]get-char-nth"]
     unsafe extern "C" fn get_char_nth(this: isize, nth: u64) -> u32 {
         let mut out = '\0';
         if nth != 0 {
@@ -40,7 +40,7 @@ impl Utf8Text {
         out as u32
     }
 
-    #[export_name = "text/Utf8Text#[dtor]get-char-nth"]
+    #[export_name = "text_ffi/Utf8Text#[dtor]get-char-nth"]
     unsafe extern "C" fn destroy(this: isize) {
         let this = this as *mut String;
         let _ = Box::from_raw(this);

@@ -3,7 +3,6 @@ resolver = "2"
 members = ["projects/*"]
 default-members = [
     "projects/wit-core",
-    "projects/wit-text",
     "projects/wit-image",
     "projects/wit-z-runner",
 ]

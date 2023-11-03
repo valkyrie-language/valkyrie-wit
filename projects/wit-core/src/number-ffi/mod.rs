@@ -1,4 +1,4 @@
-// use crate::exports::vit::number::{
+// use crate::exports::vit::number-ffi::{
 //     decimal::Decimal,
 //     fraction::Fraction,
 //     integer::{Integer, Natural, Sign},
@@ -9,12 +9,13 @@
 // use std::ops::Add;
 // use wit_bindgen::Resource;
 //
-// mod impl_dec;
-// mod impl_frac;
-// mod impl_int;
-pub mod natural;
-
+pub mod decimal;
+pub mod fraction;
 pub mod integer;
+pub mod natural;
+pub mod ordinal;
+pub mod prime;
+pub mod sign;
 // pub struct NaturalHost {
 //     owned: BigUint,
 // }

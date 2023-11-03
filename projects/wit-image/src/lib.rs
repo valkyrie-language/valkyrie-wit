@@ -8,8 +8,8 @@ mod hosts;
 pub use crate::hosts::RgbaImageHost;
 
 wit_bindgen::generate!({
-    world: "image-ffi",
+    world: "image-ffi-ffi",
     exports: {
-        "vit:image/rgba-image/rgba-image": RgbaImageHost,
+        "vit:image-ffi/rgba-image-ffi/rgba-image-ffi": RgbaImageHost,
     },
 });

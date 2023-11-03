@@ -33,12 +33,12 @@ impl Integer {
 }
 
 impl Integer {
-    #[export_name = "number/Integer#[method]new-u32"]
+    #[export_name = "number-ffi/Integer#[method]new-u32"]
     unsafe extern "C" fn new_u32(n: u32) -> isize {
         unreachable!()
     }
 
-    #[export_name = "number/Integer#[dtor]drop"]
+    #[export_name = "number-ffi/Integer#[dtor]drop"]
     unsafe extern "C" fn destroy(this: isize) {
         let this = this as *mut BigUint;
         let _ = Box::from_raw(this);
