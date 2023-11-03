@@ -12,11 +12,7 @@
 // mod impl_dec;
 // mod impl_frac;
 // mod impl_int;
-mod number;
-// mod impl_ord;
-// mod impl_prime;
-// mod impl_sign;
-mod text;
+pub mod natural;
 
 // pub struct NaturalHost {
 //     owned: BigUint,

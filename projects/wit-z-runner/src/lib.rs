@@ -23,28 +23,6 @@ pub struct ValkyrieContext {
     pub wasi: WasiCtx,
 }
 
-pub struct Utf8Text {
-    _pointer: u32,
-    length: u64,
-}
-
-pub struct ExternalCall<'vm> {
-    name: &'vm str,
-}
-
-impl<'i> ExternalCall<'i> {
-    pub fn new(name: &'i str) -> Self {
-        Self { name }
-    }
-    fn prepare(&self, store: &mut Store<ValkyrieContext>, linker: &mut Linker<ValkyrieContext>) -> Option<Func> {
-        let f_new = linker.get(store, "native", self.name)?;
-        match f_new {
-            Extern::Func(v) => Some(v),
-            _ => None,
-        }
-    }
-}
-
 impl ValkyrieVM {
     pub fn new() -> Self {
         let engine = Engine::default();
@@ -86,7 +64,7 @@ impl ValkyrieVM {
         }
     }
 
-    fn call_ffi_low(&mut self, module: &str, name: &str, input: &[Val]) -> Result<Vec<Val>> {
+    pub fn call_ffi_low(&mut self, module: &str, name: &str, input: &[Val]) -> Result<Vec<Val>> {
         let f = match self.load_function(module, name) {
             Some(s) => s,
             None => Err(anyhow::anyhow!("Function {name} in {module} not found"))?,
@@ -96,28 +74,4 @@ impl ValkyrieVM {
         f.call(&mut self.store, input, &mut output)?;
         Ok(output)
     }
-}
-
-pub enum ValkyrieValue {
-    Nat32(u32),
-    Nat64(u64),
-    Int32(i32),
-    Int64(i64),
-    Unicode(char),
-}
-
-#[test]
-fn main1() -> Result<()> {
-    let mut vm = ValkyrieVM::new();
-    vm.load_binary("native", include_bytes!("../tests/wit_number.wasm"))?;
-    vm.logging_linked();
-
-    let str_ptr = vm.call_ffi_low("native", "v:number/integer#[method]new", &[])?;
-    let char_ptr1 = vm.call_ffi_low("native", "v:number/integer#[method]add-u32", &[str_ptr[0].clone(), Val::I64(0)])?;
-    let char_ptr2 = vm.call_ffi_low("native", "v:number/integer#[method]add-u32", &[str_ptr[0].clone(), Val::I64(1)])?;
-
-    char_ptr1.iter().for_each(|v| println!("Res: {:?}", v));
-    char_ptr2.iter().for_each(|v| println!("Res: {:?}", v));
-
-    Ok(())
 }

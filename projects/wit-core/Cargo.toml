@@ -1,6 +1,5 @@
 [package]
-name = "wit-number"
-publish = false
+name = "valkyrie-wit"
 version = "0.0.0"
 authors = ["Aster <192607617@qq.com>"]
 description = "..."
@@ -15,10 +14,8 @@ exclude = ["package.json", "tests/**"]
 crate-type = ["cdylib"]
 
 [dependencies]
-#rand_core = "0.6.4"
-#fastrand = { version = "2.0.1" }
-num-traits = "0.2.17"
-num-bigint = "0.4.4"
+rand = "0.8.5"
+num = { version = "0.4.1", features = ["rand"] }
 wit-bindgen = "0.13.0"
 
 
@@ -29,6 +26,3 @@ default = []
 
 [package.metadata.docs.rs]
 all-features = true
-
-[package.metadata.cargo-wasi]
-default-args = ["build", "--target", "wasm32-wasi"]
