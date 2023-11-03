@@ -7,9 +7,7 @@
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/oovm/shape-rs/dev/projects/images/Trapezohedron.svg")]
 
 mod helper;
+
 pub mod image_ffi;
 pub mod number_ffi;
-// mod impl_ord;
-// mod impl_prime;
-// mod impl_sign;
 pub mod text_ffi;
