@@ -7,8 +7,8 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.75"
 itertools = "0.11.0"
-wasmtime = "14.0.3"
-wasmtime-wasi = { version = "14.0.3", features = ["preview2"] }
+wasmtime = { version = "14.0.3", features = ["component-model"] }
+wasmtime-wasi = { version = "14.0.3", features = [] }
 
 
 [dev-dependencies]

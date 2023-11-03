@@ -1,5 +1,5 @@
 [package]
-name = "valkyrie-wit"
+name = "valkyrie-ffi"
 version = "0.0.0"
 authors = ["Aster <192607617@qq.com>"]
 description = "..."
@@ -14,9 +14,10 @@ exclude = ["package.json", "tests/**"]
 crate-type = ["cdylib"]
 
 [dependencies]
+serde = "1.0.190"
 rand = "0.8.5"
-num = { version = "0.4.1", features = ["rand"] }
-image = "0.24.7"
+num = { version = "0.4.1", features = ["rand", "serde"] }
+image = { version = "0.24.7", features = [] }
 wit-bindgen = "0.13.0"
 
 

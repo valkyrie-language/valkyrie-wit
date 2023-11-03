@@ -12,6 +12,7 @@ use std::{
 use wasmtime::{HostAbi, *};
 use wasmtime_wasi::{WasiCtx, WasiCtxBuilder};
 
+mod values;
 pub struct ValkyrieVM {
     engine: Engine,
     linker: Linker<ValkyrieContext>,
@@ -25,7 +26,7 @@ pub struct ValkyrieContext {
 
 impl ValkyrieVM {
     pub fn new() -> Self {
-        let engine = Engine::default();
+        let engine = Engine::new(&Config::new().wasm_component_model(true)).expect("fail to initialize ValkyrieVM");
         let mut linker = Linker::new(&engine);
         wasmtime_wasi::add_to_linker(&mut linker, |state: &mut ValkyrieContext| &mut state.wasi).unwrap();
         let wasi = WasiCtxBuilder::new().inherit_stdio().inherit_args().unwrap().build();
