@@ -1,5 +1,6 @@
 package vit:text
 
 world text-ffi {
+     include ascii-ffi;
      include utf8-ffi;
 }

@@ -3,10 +3,18 @@ package vit:text
 
 interface utf8 {
     record unicode {
-        codepoint: u32,
+        codepoint: char,
+    }
+    record utf8-view {
+        text: utf8-text,
+        start: u64,
+        end: u64,
     }
     resource utf8-text {
-        get-char-offset: func(offset:u32) -> option<unicode>
+        get-char-offset: func(offset: u64) -> option<unicode>
+        get-char-nth: func(nth: u64) -> option<unicode>
+        get-view-offset-range: func(start: u64, end: u64) -> option<utf8-view>
+        get-view-nth-range: func(start: u64, end: u64) -> option<utf8-view>
     }
 }
 

@@ -13,7 +13,7 @@ pub use crate::hosts::{AsciiHost, IntegerHost, NaturalHost, UTF16Host, UTF8Host,
 wit_bindgen::generate!({
     world: "text-ffi",
     exports: {
-        "vit:text/ascii/ascii-text": UTF8Host,
-        "vit:text/utf8/utf8-text": UTF8Host,
+        "vit:text/ascii/ascii-text": AsciiHost,
+        "vit:text/utf8/utf8-text":  UTF8Host,
     },
 });

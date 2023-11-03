@@ -7,7 +7,7 @@ interface ascii {
     }
 
     resource ascii-text {
-        get-char-offset: func(offset: u32) -> option<ascii>
+        get-char-offset: func(offset: u64) -> option<ascii>
     }
 }
 
