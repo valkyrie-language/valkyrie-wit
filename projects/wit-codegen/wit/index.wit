@@ -1,5 +1,9 @@
-package vit:image
+package vit:number
 
-world image-ffi {
-     export rgba-image;
+world number-ffi {
+     include integer-ffi;
+     include decimal-ffi;
+     include fraction-ffi;
+     include prime-ffi;
+     import vit:text/ascii;
 }
