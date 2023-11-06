@@ -1,4 +1,6 @@
+use convert_case::{Case, Casing};
 use id_arena::Id;
+use itertools::Itertools;
 use std::{
     collections::HashMap,
     fs::File,
@@ -7,13 +9,15 @@ use std::{
 };
 use wit_bindgen_core::{
     wit_parser::{
-        Enum, Field, Function, FunctionKind, Interface, Package, Record, Resolve, Results, Type, TypeDef, TypeDefKind,
-        TypeOwner, UnresolvedPackage, World, WorldItem, WorldKey,
+        Function, Interface, Package, Resolve, TypeDef, TypeDefKind, TypeOwner, UnresolvedPackage, World, WorldItem, WorldKey,
     },
     Files,
 };
 use wit_bindgen_rust::ExportKey;
 
+const LANGUAGE_ID: &'static str = "v";
+
+/// Foreign Function Interface Generator for Valkyrie Language
 pub struct ForeignGenerator {
     package_name: String,
     pid: Id<Package>,
@@ -22,9 +26,8 @@ pub struct ForeignGenerator {
     resolve: Resolve,
 }
 
-const LANGUAGE_ID: &'static str = "v";
-
 impl ForeignGenerator {
+    /// Create a new generator
     pub fn new(package: &str) -> anyhow::Result<Self> {
         let mut resolve = Resolve::default();
         let root = UnresolvedPackage::parse(
@@ -47,28 +50,28 @@ impl ForeignGenerator {
     pub fn get_package(&self) -> &World {
         self.resolve.worlds.get(self.wid).expect("")
     }
-    pub fn make_module(&mut self, target: &str) -> Id<Interface> {
-        match self.map_module.get(target) {
-            None => {}
-            Some(s) => {
-                return *s;
-            }
+    pub fn make_module(&mut self, target: &[String]) -> Id<Interface> {
+        let target = target.iter().map(|v| v.to_case(Case::Kebab)).join("/");
+        if let Some(s) = self.map_module.get(&target) {
+            return *s;
         }
         let mid = self.resolve.interfaces.alloc(Interface {
-            name: Some(target.to_string()),
+            name: Some(target.clone()),
             types: Default::default(),
             functions: Default::default(),
             docs: Default::default(),
             package: Some(self.pid),
         });
-        self.map_module.insert(target.to_string(), mid);
+        self.map_module.insert(target, mid);
         let world = self.resolve.worlds.get_mut(self.wid).unwrap();
         world.exports.insert(WorldKey::Interface(mid), WorldItem::Interface(mid));
         mid
     }
-    pub fn make_function(&mut self, mid: Id<Interface>, f: Function) {
+    pub fn make_function(&mut self, mid: Id<Interface>, mut f: Function) {
+        let name = f.name.to_case(Case::Kebab);
+        f.name = name.clone();
         let module = self.mut_module(mid);
-        module.functions.insert(f.name.clone(), f);
+        module.functions.insert(name, f);
     }
     pub fn get_module(&self, id: Id<Interface>) -> &Interface {
         self.resolve.interfaces.get(id).expect("")
@@ -78,13 +81,19 @@ impl ForeignGenerator {
     }
     pub fn make_type(&mut self, mid: Id<Interface>, name: &str, kind: TypeDefKind) -> Id<TypeDef> {
         let tid = self.resolve.types.alloc(TypeDef {
-            name: Some(name.to_string()),
+            name: Some(name.to_case(Case::Kebab)),
             kind,
             owner: TypeOwner::Interface(mid),
             docs: Default::default(),
         });
         let module = self.mut_module(mid);
         module.types.insert(name.to_string(), tid);
+        tid
+    }
+    pub fn anonymous_type(&mut self, kind: TypeDefKind) -> Id<TypeDef> {
+        let tid = self.resolve.types.alloc(TypeDef { name: None, kind, owner: TypeOwner::None, docs: Default::default() });
+        // let module = self.mut_module(mid);
+        // module.types.insert(name.to_string(), tid);
         tid
     }
     pub fn get_type(&self, id: Id<TypeDef>) -> Option<&TypeDef> {
@@ -99,7 +108,7 @@ impl ForeignGenerator {
     pub fn build_rust<P: AsRef<Path>>(&self, dir: P) -> anyhow::Result<()> {
         let path = ensure_dir(dir)?;
         let mut builder =
-            wit_bindgen_rust::Opts { rustfmt: false, stubs: true, exports: self.ensure_export(), ..Default::default() }.build();
+            wit_bindgen_rust::Opts { rustfmt: false, exports: self.ensure_export(), ..Default::default() }.build();
         let mut files = Files::default();
         builder.generate(&self.resolve, self.wid, &mut files)?;
         for (name, content) in files.iter() {
@@ -119,6 +128,28 @@ impl ForeignGenerator {
         }
         Ok(())
     }
+    pub fn build_csharp<P: AsRef<Path>>(&self, dir: P) -> anyhow::Result<()> {
+        let path = ensure_dir(dir)?;
+        let mut builder = wit_bindgen_csharp::Opts::default().build();
+        let mut files = Files::default();
+        builder.generate(&self.resolve, self.wid, &mut files)?;
+        for (name, content) in files.iter() {
+            let mut file = File::create(path.join(name))?;
+            file.write_all(content)?;
+        }
+        Ok(())
+    }
+    pub fn build_java<P: AsRef<Path>>(&self, dir: P) -> anyhow::Result<()> {
+        let path = ensure_dir(dir)?;
+        let mut builder = wit_bindgen_teavm_java::Opts::default().build();
+        let mut files = Files::default();
+        builder.generate(&self.resolve, self.wid, &mut files)?;
+        for (name, content) in files.iter() {
+            let mut file = File::create(path.join(name))?;
+            file.write_all(content)?;
+        }
+        Ok(())
+    }
     fn ensure_export(&self) -> HashMap<ExportKey, String> {
         let mut exports = HashMap::default();
         for (_, i) in &self.get_package().exports {
@@ -126,7 +157,10 @@ impl ForeignGenerator {
                 WorldItem::Interface(i) => match &self.get_module(*i).name {
                     None => {}
                     Some(s) => {
-                        exports.insert(ExportKey::Name(format!("{}:{}/{}", LANGUAGE_ID, self.package_name, s)), s.to_string());
+                        exports.insert(
+                            ExportKey::Name(format!("{}:{}/{}", LANGUAGE_ID, self.package_name, s)),
+                            format!("{}Host", s),
+                        );
                     }
                 },
                 WorldItem::Function(_) => {}
@@ -135,7 +169,17 @@ impl ForeignGenerator {
                 }
             }
         }
-        exports.insert(ExportKey::Name("v:core/number/Natural".to_string()), "Natural".to_string());
+        for (_, ty) in &self.resolve.types {
+            match get_type_namepath(self, ty) {
+                Some((m_name, name)) => {
+                    exports.insert(
+                        ExportKey::Name(format!("{}:{}/{}/{}", LANGUAGE_ID, self.package_name, m_name, name)),
+                        format!("{}FFI", name),
+                    );
+                }
+                _ => {}
+            }
+        }
         exports
     }
 }
@@ -152,4 +196,16 @@ where
         anyhow::bail!("{} is not a directory", path.display());
     }
     Ok(path.canonicalize()?)
+}
+
+fn get_type_namepath<'a>(this: &'a ForeignGenerator, ty: &'a TypeDef) -> Option<(&'a str, &'a str)> {
+    let name = ty.name.as_ref()?;
+    match &ty.owner {
+        TypeOwner::Interface(i) => {
+            let m = this.get_module(*i);
+            let m_name = m.name.as_ref()?;
+            Some((m_name, name))
+        }
+        _ => None,
+    }
 }

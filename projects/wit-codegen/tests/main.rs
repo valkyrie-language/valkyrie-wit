@@ -1,6 +1,7 @@
+use convert_case::{Case, Casing};
 use std::path::Path;
 use valkyrie_wit::ForeignGenerator;
-use wit_bindgen_core::wit_parser::{Enum, Field, Function, FunctionKind, Record, Results, Type, TypeDefKind};
+use wit_bindgen_core::wit_parser::{Enum, EnumCase, Field, Function, FunctionKind, Record, Results, Type, TypeDefKind};
 
 mod codegen;
 #[test]
@@ -9,13 +10,23 @@ fn ready() {
 }
 
 #[test]
-fn parse_source2() -> anyhow::Result<()> {
+fn parse_source() -> anyhow::Result<()> {
     let mut resolve = ForeignGenerator::new("core")?;
-    let mid = resolve.make_module("number");
-    let sign = resolve.make_type(mid, "Sign", TypeDefKind::Enum(Enum { cases: vec![] }));
-    let nat = resolve.make_type(mid, "Natural", TypeDefKind::List(Type::U8));
+    let number = resolve.make_module(&["number".to_string()]);
+    let sign = resolve.make_type(
+        number,
+        "Sign",
+        TypeDefKind::Enum(Enum {
+            cases: vec![
+                EnumCase { name: "NoSign".to_case(Case::Kebab), docs: Default::default() },
+                EnumCase { name: "Positive".to_case(Case::Kebab), docs: Default::default() },
+                EnumCase { name: "Negative".to_case(Case::Kebab), docs: Default::default() },
+            ],
+        }),
+    );
+    let nat = resolve.make_type(number, "Natural", TypeDefKind::Record(Record { fields: vec![] }));
     let int = resolve.make_type(
-        mid,
+        number,
         "Integer",
         TypeDefKind::Record(Record {
             fields: vec![
@@ -24,67 +35,83 @@ fn parse_source2() -> anyhow::Result<()> {
             ],
         }),
     );
-    // let t_nat = resolve.get_module();
 
     resolve.make_function(
-        mid,
+        number,
         Function {
-            name: "Natural.new_u64".to_string(),
-            kind: FunctionKind::Static(nat),
+            name: "nat_new_u64".to_string(),
+            kind: FunctionKind::Freestanding,
             params: vec![("n".to_string(), Type::U64)],
             results: Results::Anon(Type::Id(nat)),
             docs: Default::default(),
         },
     );
     resolve.make_function(
-        mid,
+        number,
         Function {
-            name: "Natural.add_u64".to_string(),
-            kind: FunctionKind::Method(nat),
-            params: vec![("self".to_string(), Type::Id(nat)), ("rhs".to_string(), Type::U64)],
-            results: Results::Anon(Type::Id(nat)),
-            docs: Default::default(),
-        },
-    );
-    resolve.make_function(
-        mid,
-        Function {
-            name: "Natural.add_u64_inplace".to_string(),
-            kind: FunctionKind::Method(nat),
-            params: vec![("self".to_string(), Type::Id(nat)), ("rhs".to_string(), Type::U64)],
-            results: Results::Named(vec![]),
-            docs: Default::default(),
-        },
-    );
-    resolve.make_function(
-        mid,
-        Function {
-            name: "Natural.add_nat".to_string(),
-            kind: FunctionKind::Method(nat),
-            params: vec![("self".to_string(), Type::Id(nat)), ("rhs".to_string(), Type::Id(nat))],
-            results: Results::Anon(Type::Id(nat)),
-            docs: Default::default(),
-        },
-    );
-    resolve.make_function(
-        mid,
-        Function {
-            name: "Natural.add_nat_inplace".to_string(),
-            kind: FunctionKind::Method(nat),
-            params: vec![("self".to_string(), Type::Id(nat)), ("rhs".to_string(), Type::Id(nat))],
-            results: Results::Named(vec![]),
-            docs: Default::default(),
-        },
-    );
-
-    let mid = resolve.make_module("text");
-    let utf = resolve.make_type(mid, "UTF8Text", TypeDefKind::List(Type::U8));
-    resolve.make_function(
-        mid,
-        Function {
-            name: "recast".to_string(),
+            name: "nat_add_u64".to_string(),
             kind: FunctionKind::Freestanding,
-            params: vec![("self".to_string(), Type::Id(utf)), ("rhs".to_string(), Type::Id(utf))],
+            params: vec![("this".to_string(), Type::Id(nat)), ("rhs".to_string(), Type::U64)],
+            results: Results::Anon(Type::Id(nat)),
+            docs: Default::default(),
+        },
+    );
+    resolve.make_function(
+        number,
+        Function {
+            name: "nat_add_u64_inplace".to_string(),
+            kind: FunctionKind::Freestanding,
+            params: vec![("this".to_string(), Type::Id(nat)), ("rhs".to_string(), Type::U64)],
+            results: Results::Named(vec![]),
+            docs: Default::default(),
+        },
+    );
+    resolve.make_function(
+        number,
+        Function {
+            name: "nat_add_nat".to_string(),
+            kind: FunctionKind::Freestanding,
+            params: vec![("this".to_string(), Type::Id(nat)), ("rhs".to_string(), Type::Id(nat))],
+            results: Results::Anon(Type::Id(nat)),
+            docs: Default::default(),
+        },
+    );
+    resolve.make_function(
+        number,
+        Function {
+            name: "nat_add_nat_inplace".to_string(),
+            kind: FunctionKind::Freestanding,
+            params: vec![("this".to_string(), Type::Id(nat)), ("rhs".to_string(), Type::Id(nat))],
+            results: Results::Named(vec![]),
+            docs: Default::default(),
+        },
+    );
+    resolve.make_function(
+        number,
+        Function {
+            name: "int_add_u64".to_string(),
+            kind: FunctionKind::Freestanding,
+            params: vec![("this".to_string(), Type::Id(int)), ("rhs".to_string(), Type::U64)],
+            results: Results::Anon(Type::Id(int)),
+            docs: Default::default(),
+        },
+    );
+    resolve.make_function(
+        number,
+        Function {
+            name: "int_add_nat".to_string(),
+            kind: FunctionKind::Freestanding,
+            params: vec![("this".to_string(), Type::Id(int)), ("rhs".to_string(), Type::Id(nat))],
+            results: Results::Anon(Type::Id(int)),
+            docs: Default::default(),
+        },
+    );
+    resolve.make_function(
+        number,
+        Function {
+            name: "int_add_int".to_string(),
+            kind: FunctionKind::Freestanding,
+            params: vec![("this".to_string(), Type::Id(int)), ("rhs".to_string(), Type::Id(int))],
             results: Results::Anon(Type::Id(int)),
             docs: Default::default(),
         },
@@ -100,5 +127,7 @@ fn parse_source2() -> anyhow::Result<()> {
     let here = Path::new(env!("CARGO_MANIFEST_DIR")).canonicalize()?;
     resolve.build_rust(&here.join("tests/codegen"))?;
     resolve.build_markdown(&here.join("tests/codegen"))?;
+    // resolve.build_java(&here.join("tests/codegen"))?;
+    // resolve.build_csharp(&here.join("tests/codegen"))?;
     Ok(())
 }

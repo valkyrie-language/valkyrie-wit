@@ -3,7 +3,6 @@
 <li>Exports:
 <ul>
 <li>interface <a href="#v:core_number"><code>v:core/number</code></a></li>
-<li>interface <a href="#v:core_text"><code>v:core/text</code></a></li>
 </ul>
 </li>
 </ul>
@@ -12,73 +11,89 @@
 <h3>Types</h3>
 <h4><a name="sign"><code>enum Sign</code></a></h4>
 <h5>Enum Cases</h5>
-<h4><a name="natural"><code>type Natural</code></a></h4>
-<p><a href="#natural"><a href="#natural"><code>Natural</code></a></a></p>
-<p>
-#### <a name="integer">`record Integer`</a>
+<ul>
+<li><a name="sign.no_sign"><code>no-sign</code></a></li>
+<li><a name="sign.positive"><code>positive</code></a></li>
+<li><a name="sign.negative"><code>negative</code></a></li>
+</ul>
+<h4><a name="natural"><code>record Natural</code></a></h4>
+<h5>Record Fields</h5>
+<h4><a name="integer"><code>record Integer</code></a></h4>
 <h5>Record Fields</h5>
 <ul>
-<li><a name="integer.sign"><code>sign</code></a>: <a href="#sign"><a href="#sign"><code>Sign</code></a></a></li>
-<li><a name="integer.natural"><code>natural</code></a>: <a href="#natural"><a href="#natural"><code>Natural</code></a></a></li>
+<li><a name="integer.sign"><code>sign</code></a>: <a href="#sign"><code>sign</code></a></li>
+<li><a name="integer.natural"><code>natural</code></a>: <a href="#natural"><code>natural</code></a></li>
 </ul>
 <hr />
 <h3>Functions</h3>
-<h4><a name="natural.new_u64"><code>Natural.new_u64: func</code></a></h4>
+<h4><a name="nat_new_u_64"><code>nat-new-u-64: func</code></a></h4>
 <h5>Params</h5>
 <ul>
-<li><a name="natural.new_u64.n"><code>n</code></a>: <code>u64</code></li>
+<li><a name="nat_new_u_64.n"><code>n</code></a>: <code>u64</code></li>
 </ul>
 <h5>Return values</h5>
 <ul>
-<li><a name="natural.new_u64.0"></a> <a href="#natural"><a href="#natural"><code>Natural</code></a></a></li>
+<li><a name="nat_new_u_64.0"></a> <a href="#natural"><code>natural</code></a></li>
 </ul>
-<h4><a name="natural.add_u64"><code>Natural.add_u64: func</code></a></h4>
+<h4><a name="nat_add_u_64"><code>nat-add-u-64: func</code></a></h4>
 <h5>Params</h5>
 <ul>
-<li><a name="natural.add_u64.self"><code>self</code></a>: <a href="#natural"><a href="#natural"><code>Natural</code></a></a></li>
-<li><a name="natural.add_u64.rhs"><code>rhs</code></a>: <code>u64</code></li>
+<li><a name="nat_add_u_64.this"><code>this</code></a>: <a href="#natural"><code>natural</code></a></li>
+<li><a name="nat_add_u_64.rhs"><code>rhs</code></a>: <code>u64</code></li>
 </ul>
 <h5>Return values</h5>
 <ul>
-<li><a name="natural.add_u64.0"></a> <a href="#natural"><a href="#natural"><code>Natural</code></a></a></li>
+<li><a name="nat_add_u_64.0"></a> <a href="#natural"><code>natural</code></a></li>
 </ul>
-<h4><a name="natural.add_u64_inplace"><code>Natural.add_u64_inplace: func</code></a></h4>
+<h4><a name="nat_add_u_64_inplace"><code>nat-add-u-64-inplace: func</code></a></h4>
 <h5>Params</h5>
 <ul>
-<li><a name="natural.add_u64_inplace.self"><code>self</code></a>: <a href="#natural"><a href="#natural"><code>Natural</code></a></a></li>
-<li><a name="natural.add_u64_inplace.rhs"><code>rhs</code></a>: <code>u64</code></li>
+<li><a name="nat_add_u_64_inplace.this"><code>this</code></a>: <a href="#natural"><code>natural</code></a></li>
+<li><a name="nat_add_u_64_inplace.rhs"><code>rhs</code></a>: <code>u64</code></li>
 </ul>
-<h4><a name="natural.add_nat"><code>Natural.add_nat: func</code></a></h4>
+<h4><a name="nat_add_nat"><code>nat-add-nat: func</code></a></h4>
 <h5>Params</h5>
 <ul>
-<li><a name="natural.add_nat.self"><code>self</code></a>: <a href="#natural"><a href="#natural"><code>Natural</code></a></a></li>
-<li><a name="natural.add_nat.rhs"><code>rhs</code></a>: <a href="#natural"><a href="#natural"><code>Natural</code></a></a></li>
+<li><a name="nat_add_nat.this"><code>this</code></a>: <a href="#natural"><code>natural</code></a></li>
+<li><a name="nat_add_nat.rhs"><code>rhs</code></a>: <a href="#natural"><code>natural</code></a></li>
 </ul>
 <h5>Return values</h5>
 <ul>
-<li><a name="natural.add_nat.0"></a> <a href="#natural"><a href="#natural"><code>Natural</code></a></a></li>
+<li><a name="nat_add_nat.0"></a> <a href="#natural"><code>natural</code></a></li>
 </ul>
-<h4><a name="natural.add_nat_inplace"><code>Natural.add_nat_inplace: func</code></a></h4>
+<h4><a name="nat_add_nat_inplace"><code>nat-add-nat-inplace: func</code></a></h4>
 <h5>Params</h5>
 <ul>
-<li><a name="natural.add_nat_inplace.self"><code>self</code></a>: <a href="#natural"><a href="#natural"><code>Natural</code></a></a></li>
-<li><a name="natural.add_nat_inplace.rhs"><code>rhs</code></a>: <a href="#natural"><a href="#natural"><code>Natural</code></a></a></li>
+<li><a name="nat_add_nat_inplace.this"><code>this</code></a>: <a href="#natural"><code>natural</code></a></li>
+<li><a name="nat_add_nat_inplace.rhs"><code>rhs</code></a>: <a href="#natural"><code>natural</code></a></li>
 </ul>
-<h2><a name="v:core_text">Export interface v:core/text</a></h2>
-<hr />
-<h3>Types</h3>
-<h4><a name="utf8_text"><code>type UTF8Text</code></a></h4>
-<p><a href="#utf8_text"><a href="#utf8_text"><code>UTF8Text</code></a></a></p>
-<p>
-----
-<h3>Functions</h3>
-<h4><a name="recast"><code>recast: func</code></a></h4>
+<h4><a name="int_add_u_64"><code>int-add-u-64: func</code></a></h4>
 <h5>Params</h5>
 <ul>
-<li><a name="recast.self"><code>self</code></a>: <a href="#utf8_text"><a href="#utf8_text"><code>UTF8Text</code></a></a></li>
-<li><a name="recast.rhs"><code>rhs</code></a>: <a href="#utf8_text"><a href="#utf8_text"><code>UTF8Text</code></a></a></li>
+<li><a name="int_add_u_64.this"><code>this</code></a>: <a href="#integer"><code>integer</code></a></li>
+<li><a name="int_add_u_64.rhs"><code>rhs</code></a>: <code>u64</code></li>
 </ul>
 <h5>Return values</h5>
 <ul>
-<li><a name="recast.0"></a> <a href="#integer"><a href="#integer"><code>Integer</code></a></a></li>
+<li><a name="int_add_u_64.0"></a> <a href="#integer"><code>integer</code></a></li>
+</ul>
+<h4><a name="int_add_nat"><code>int-add-nat: func</code></a></h4>
+<h5>Params</h5>
+<ul>
+<li><a name="int_add_nat.this"><code>this</code></a>: <a href="#integer"><code>integer</code></a></li>
+<li><a name="int_add_nat.rhs"><code>rhs</code></a>: <a href="#natural"><code>natural</code></a></li>
+</ul>
+<h5>Return values</h5>
+<ul>
+<li><a name="int_add_nat.0"></a> <a href="#integer"><code>integer</code></a></li>
+</ul>
+<h4><a name="int_add_int"><code>int-add-int: func</code></a></h4>
+<h5>Params</h5>
+<ul>
+<li><a name="int_add_int.this"><code>this</code></a>: <a href="#integer"><code>integer</code></a></li>
+<li><a name="int_add_int.rhs"><code>rhs</code></a>: <a href="#integer"><code>integer</code></a></li>
+</ul>
+<h5>Return values</h5>
+<ul>
+<li><a name="int_add_int.0"></a> <a href="#integer"><code>integer</code></a></li>
 </ul>

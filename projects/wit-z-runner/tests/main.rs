@@ -7,7 +7,7 @@ fn ready() {
     println!("it works!")
 }
 
-const WASM: &[u8] = include_bytes!("../../../target/wasm32-wasi/debug/valkyrie-wit.wasm");
+const WASM: &[u8] = include_bytes!("../../../target/wasm32-wasi/debug/valkyrie_ffi.wasm");
 
 #[test]
 fn main1() -> Result<()> {
