@@ -8,7 +8,9 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
+indexmap = "2.1.0"
 anyhow = "1.0.75"
+id-arena = "2.2.1"
 wit-bindgen-core = "0.13.1"
 wit-bindgen-rust = "0.13.2"
 
