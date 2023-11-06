@@ -25,31 +25,25 @@ fn ensure_world(scope: &mut Resolve, pid: Id<Package>, target: &str) -> Id<World
 }
 
 pub fn take_interface<'i>(scope: &'i mut Resolve, pid: Id<Package>, name: &str) -> (Id<Interface>, &'i mut Interface) {
-    match find_interface(scope, name) {
-        Some(s) => return s,
-        None => {}
-    }
-    scope.interfaces.alloc(Interface {
-        name: Some(name.to_string()),
-        types: Default::default(),
-        functions: Default::default(),
-        docs: Default::default(),
-        package: Some(pid),
-    });
-    match find_interface(scope, name) {
-        Some(s) => return s,
-        None => unreachable!(),
-    }
+    let id = ensure_interface(scope, pid, name);
+    let o = scope.interfaces.get_mut(id).expect("");
+    (id, o)
 }
 
-fn find_interface<'i>(scope: &'i mut Resolve, target: &str) -> Option<(Id<Interface>, &'i mut Interface)> {
+fn ensure_interface(scope: &mut Resolve, pid: Id<Package>, target: &str) -> Id<Interface> {
     for (w, object) in scope.interfaces.iter_mut() {
         match &object.name {
             Some(s) if s.eq(target) => {
-                return Some((w, object));
+                return w;
             }
             _ => {}
         }
     }
-    return None;
+    scope.interfaces.alloc(Interface {
+        name: Some(target.to_string()),
+        types: Default::default(),
+        functions: Default::default(),
+        docs: Default::default(),
+        package: Some(pid),
+    })
 }

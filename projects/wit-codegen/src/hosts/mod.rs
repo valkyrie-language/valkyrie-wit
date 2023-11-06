@@ -66,6 +66,10 @@ interface my-plugin-api {
   get-position: func() -> coord
   set-position: func(pos: coord)
 
+  resource use-less {
+  
+  }
+
   record monster {
     name: string,
     hp: u32,
