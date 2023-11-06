@@ -1,10 +1,8 @@
-use crate::number::natural::Natural;
-use num::{BigInt, BigUint};
-use wit_bindgen::rt::{Resource, WasmResource};
+use super::*;
 
 /// unsigned integer buffer
-#[derive(Debug)]
-#[repr(transparent)]
+#[repr(align(4))]
+#[repr(C, align(4))]
 pub struct Integer {
     // offset = 0, size = 8
     sign: Sign,
@@ -12,6 +10,7 @@ pub struct Integer {
     raw: Resource<Natural>,
 }
 
+#[derive(Debug)]
 #[repr(i8)]
 pub enum Sign {
     UnSign = 0,

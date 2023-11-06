@@ -1,5 +1,5 @@
 package vit:image
 
 world image-ffi {
-     include rgba-ffi;
+     export rgba-image;
 }

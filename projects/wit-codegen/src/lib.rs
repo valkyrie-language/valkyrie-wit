@@ -5,11 +5,3 @@
 #![doc(html_favicon_url = "https://raw.githubusercontent.com/oovm/shape-rs/dev/projects/images/Trapezohedron.svg")]
 
 mod hosts;
-pub use crate::hosts::RgbaImageHost;
-
-wit_bindgen::generate!({
-    world: "image-ffi-ffi",
-    exports: {
-        "vit:image-ffi/rgba-image-ffi/rgba-image-ffi": RgbaImageHost,
-    },
-});

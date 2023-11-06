@@ -1,14 +1,6 @@
-// use crate::exports::vit::number-ffi::{
-//     decimal::Decimal,
-//     fraction::Fraction,
-//     integer::{Integer, Natural, Sign},
-//     natural::{GuestNatural, OwnNatural},
-// };
-// use num_bigint::{BigInt, BigUint};
-// use num_traits::Zero;
-// use std::ops::Add;
-// use wit_bindgen::Resource;
-//
+use crate::number_ffi::natural::Natural;
+use num::{BigInt, BigUint};
+use wit_bindgen::rt::{Resource, WasmResource};
 pub mod decimal;
 pub mod fraction;
 pub mod integer;

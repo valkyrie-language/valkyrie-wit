@@ -21,7 +21,3 @@ interface rgba-image {
 
     }
 }
-
-world rgba-ffi {
-    export rgba-image
-}
