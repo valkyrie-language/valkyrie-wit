@@ -10,7 +10,7 @@ fn ready() {
 
 #[test]
 fn parse_source2() -> anyhow::Result<()> {
-    let mut resolve = ForeignGenerator::new("native")?;
+    let mut resolve = ForeignGenerator::new("core")?;
     let mid = resolve.make_module("number");
     let sign = resolve.make_type(mid, "Sign", TypeDefKind::Enum(Enum { cases: vec![] }));
     let nat = resolve.make_type(mid, "Natural", TypeDefKind::List(Type::U8));
@@ -20,34 +20,65 @@ fn parse_source2() -> anyhow::Result<()> {
         TypeDefKind::Record(Record {
             fields: vec![
                 Field { name: "sign".to_string(), ty: Type::Id(sign), docs: Default::default() },
-                Field { name: "natural".to_string(), ty: Type::Id(sign), docs: Default::default() },
+                Field { name: "natural".to_string(), ty: Type::Id(nat), docs: Default::default() },
             ],
         }),
     );
     // let t_nat = resolve.get_module();
+
     resolve.make_function(
         mid,
         Function {
-            name: "recast".to_string(),
-            kind: FunctionKind::Freestanding,
-            params: vec![("self".to_string(), Type::Id(nat)), ("rhs".to_string(), Type::Id(nat))],
-            results: Results::Anon(Type::Id(int)),
+            name: "Natural.new_u64".to_string(),
+            kind: FunctionKind::Static(nat),
+            params: vec![("n".to_string(), Type::U64)],
+            results: Results::Anon(Type::Id(nat)),
             docs: Default::default(),
         },
     );
     resolve.make_function(
         mid,
         Function {
-            name: "new".to_string(),
-            kind: FunctionKind::Freestanding,
+            name: "Natural.add_u64".to_string(),
+            kind: FunctionKind::Method(nat),
+            params: vec![("self".to_string(), Type::Id(nat)), ("rhs".to_string(), Type::U64)],
+            results: Results::Anon(Type::Id(nat)),
+            docs: Default::default(),
+        },
+    );
+    resolve.make_function(
+        mid,
+        Function {
+            name: "Natural.add_u64_inplace".to_string(),
+            kind: FunctionKind::Method(nat),
+            params: vec![("self".to_string(), Type::Id(nat)), ("rhs".to_string(), Type::U64)],
+            results: Results::Named(vec![]),
+            docs: Default::default(),
+        },
+    );
+    resolve.make_function(
+        mid,
+        Function {
+            name: "Natural.add_nat".to_string(),
+            kind: FunctionKind::Method(nat),
             params: vec![("self".to_string(), Type::Id(nat)), ("rhs".to_string(), Type::Id(nat))],
-            results: Results::Anon(Type::Id(int)),
+            results: Results::Anon(Type::Id(nat)),
+            docs: Default::default(),
+        },
+    );
+    resolve.make_function(
+        mid,
+        Function {
+            name: "Natural.add_nat_inplace".to_string(),
+            kind: FunctionKind::Method(nat),
+            params: vec![("self".to_string(), Type::Id(nat)), ("rhs".to_string(), Type::Id(nat))],
+            results: Results::Named(vec![]),
             docs: Default::default(),
         },
     );
 
     let mid = resolve.make_module("text");
-    let utf = resolve.make_type(mid, "Natural", TypeDefKind::List(Type::U8));
+    let utf = resolve.make_type(mid, "UTF8Text", TypeDefKind::List(Type::U8));
     resolve.make_function(
         mid,
         Function {

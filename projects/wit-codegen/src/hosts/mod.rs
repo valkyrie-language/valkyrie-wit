@@ -87,13 +87,19 @@ impl ForeignGenerator {
         module.types.insert(name.to_string(), tid);
         tid
     }
+    pub fn get_type(&self, id: Id<TypeDef>) -> Option<&TypeDef> {
+        self.resolve.types.get(id)
+    }
+    pub fn mut_type(&mut self, id: Id<TypeDef>) -> Option<&mut TypeDef> {
+        self.resolve.types.get_mut(id)
+    }
 }
 
 impl ForeignGenerator {
     pub fn build_rust<P: AsRef<Path>>(&self, dir: P) -> anyhow::Result<()> {
         let path = ensure_dir(dir)?;
         let mut builder =
-            wit_bindgen_rust::Opts { rustfmt: false, exports: self.ensure_export(), ..Default::default() }.build();
+            wit_bindgen_rust::Opts { rustfmt: false, stubs: true, exports: self.ensure_export(), ..Default::default() }.build();
         let mut files = Files::default();
         builder.generate(&self.resolve, self.wid, &mut files)?;
         for (name, content) in files.iter() {
@@ -124,9 +130,12 @@ impl ForeignGenerator {
                     }
                 },
                 WorldItem::Function(_) => {}
-                WorldItem::Type(_) => {}
+                WorldItem::Type(v) => {
+                    println!("{:?}", self.get_type(*v))
+                }
             }
         }
+        exports.insert(ExportKey::Name("v:core/number/Natural".to_string()), "Natural".to_string());
         exports
     }
 }

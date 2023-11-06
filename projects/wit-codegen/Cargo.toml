@@ -2,7 +2,7 @@
 name = "valkyrie-wit"
 version = "0.0.0"
 authors = ["Aster <192607617@qq.com>"]
-description = "..."
+description = "Generate external type bindings for the valkyrie language"
 repository = "https://github.com/oovm/sub_projects"
 documentation = "https://docs.rs/sub_projects"
 readme = "readme.md"
@@ -16,6 +16,8 @@ anyhow = "1.0.75"
 id-arena = "2.2.1"
 wit-bindgen-markdown = "0.13.1"
 wit-bindgen-core = "0.13.1"
+wit-bindgen-csharp = "0.13.1"
+wit-bindgen-teavm-java = "0.13.1"
 wit-bindgen-rust = "0.13.2"
 
 [dev-dependencies]
