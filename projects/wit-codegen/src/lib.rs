@@ -6,3 +6,5 @@
 
 mod helpers;
 mod hosts;
+
+pub use crate::hosts::ForeignGenerator;

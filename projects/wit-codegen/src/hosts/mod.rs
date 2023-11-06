@@ -1,113 +1,146 @@
-use crate::helpers::{find_type, take_interface, take_world, PackageResolver, WitPackage};
-
 use id_arena::Id;
-use std::{collections::HashMap, fs::File, io::Write, path::Path};
+use std::{
+    collections::HashMap,
+    fs::File,
+    io::Write,
+    path::{Path, PathBuf},
+};
 use wit_bindgen_core::{
     wit_parser::{
-        Field, Function, FunctionKind, Interface, PackageId, Record, Resolve, Results, Type, TypeDef, TypeDefKind, TypeOwner,
-        UnresolvedPackage, WorldItem, WorldKey,
+        Enum, Field, Function, FunctionKind, Interface, Package, Record, Resolve, Results, Type, TypeDef, TypeDefKind,
+        TypeOwner, UnresolvedPackage, World, WorldItem, WorldKey,
     },
     Files,
 };
-use wit_bindgen_rust::{ExportKey, Opts};
+use wit_bindgen_rust::ExportKey;
 
-#[test]
-fn test() {
-    let _ = parse_source2();
+pub struct ForeignGenerator {
+    package_name: String,
+    pid: Id<Package>,
+    wid: Id<World>,
+    map_module: HashMap<String, Id<Interface>>,
+    resolve: Resolve,
 }
 
-fn parse_source() -> anyhow::Result<(Resolve, PackageId)> {
-    let mut resolve = WitPackage::new("native")?;
-    let mut resolve = Resolve::default();
-    let here = Path::new(env!("CARGO_MANIFEST_DIR")).canonicalize()?;
-    let root = UnresolvedPackage::parse(&Path::new("<anonymous>"), "package v:native;world native {}").unwrap();
-    let pid = resolve.push(root).unwrap();
+const LANGUAGE_ID: &'static str = "v";
 
-    let t_nat = resolve.make_type(pid, "number", "Natural");
-    let (i_id, i) = take_interface(&mut resolve, pid, "number");
-    i.functions.insert(
-        "test".to_string(),
-        Function {
-            name: "test".to_string(),
-            kind: FunctionKind::Freestanding,
-            params: vec![],
-            results: Results::Anon(t_nat),
-            docs: Default::default(),
-        },
-    );
-
-    let (w_id, w) = take_world(&mut resolve, pid, "native");
-    w.exports.insert(WorldKey::Interface(i_id), WorldItem::Interface(i_id));
-
-    for (_, item) in &resolve.worlds {
-        println!("Worlds: {:?}", item.name);
-    }
-    for (_, item) in &resolve.types {
-        println!("Types: {:?}", item);
-    }
-    let mut exports = HashMap::<ExportKey, String>::default();
-    exports.insert(ExportKey::Name("v:native/my-plugin-api".to_string()), "Host1".to_string());
-    exports.insert(ExportKey::Name("v:native/number".to_string()), "Host2".to_string());
-    // exports.insert(ExportKey::Name("vit:number/integer".to_string()), "Host3".to_string());
-    // exports.insert(ExportKey::Name("vit:number/ordinal".to_string()), "Host4".to_string());
-    // exports.insert(ExportKey::Name("vit:number/decimal".to_string()), "Host5".to_string());
-    // exports.insert(ExportKey::Name("vit:number/fraction".to_string()), "Host6".to_string());
-    // exports.insert(ExportKey::Name("vit:number/prime".to_string()), "Host7".to_string());
-    let mut builder = Opts { rustfmt: false, exports, ..Default::default() }.build();
-    let mut files = Files::default();
-    let world = resolve.select_world(pkg, Some("number-ffi"))?;
-    match resolve.worlds.get(world) {
-        None => {}
-        Some(s) => {
-            println!("{s:#?}")
+impl ForeignGenerator {
+    pub fn new(package: &str) -> anyhow::Result<Self> {
+        let mut resolve = Resolve::default();
+        let root = UnresolvedPackage::parse(
+            &Path::new("<anonymous>"),
+            &format!("package {LANGUAGE_ID}:{package};world {package} {{}}"),
+        )?;
+        let pid = resolve.push(root)?;
+        for (wid, w) in &resolve.worlds {
+            if w.name.eq(package) {
+                return Ok(Self { package_name: package.to_string(), pid, wid, map_module: Default::default(), resolve });
+            }
         }
+        unreachable!()
     }
-
-    builder.generate(&resolve, world, &mut files).unwrap();
-
-    for (name, content) in files.iter() {
-        let mut file = File::create(here.join("tests").join("codegen").join(name))?;
-        file.write_all(content)?;
+    /// Get the language name and package infos
+    pub fn get_language(&self) -> &Package {
+        self.resolve.packages.get(self.pid).expect("")
     }
-
-    Ok((resolve, pkg))
+    /// Get the package name and world infos
+    pub fn get_package(&self) -> &World {
+        self.resolve.worlds.get(self.wid).expect("")
+    }
+    pub fn make_module(&mut self, target: &str) -> Id<Interface> {
+        match self.map_module.get(target) {
+            None => {}
+            Some(s) => {
+                return *s;
+            }
+        }
+        let mid = self.resolve.interfaces.alloc(Interface {
+            name: Some(target.to_string()),
+            types: Default::default(),
+            functions: Default::default(),
+            docs: Default::default(),
+            package: Some(self.pid),
+        });
+        self.map_module.insert(target.to_string(), mid);
+        let world = self.resolve.worlds.get_mut(self.wid).unwrap();
+        world.exports.insert(WorldKey::Interface(mid), WorldItem::Interface(mid));
+        mid
+    }
+    pub fn make_function(&mut self, mid: Id<Interface>, f: Function) {
+        let module = self.mut_module(mid);
+        module.functions.insert(f.name.clone(), f);
+    }
+    pub fn get_module(&self, id: Id<Interface>) -> &Interface {
+        self.resolve.interfaces.get(id).expect("")
+    }
+    pub fn mut_module(&mut self, id: Id<Interface>) -> &mut Interface {
+        self.resolve.interfaces.get_mut(id).expect("")
+    }
+    pub fn make_type(&mut self, mid: Id<Interface>, name: &str, kind: TypeDefKind) -> Id<TypeDef> {
+        let tid = self.resolve.types.alloc(TypeDef {
+            name: Some(name.to_string()),
+            kind,
+            owner: TypeOwner::Interface(mid),
+            docs: Default::default(),
+        });
+        let module = self.mut_module(mid);
+        module.types.insert(name.to_string(), tid);
+        tid
+    }
 }
 
-fn parse_source2() -> anyhow::Result<()> {
-    let mut resolve = WitPackage::new("native")?;
-    let t_nat = resolve.make_type(
-        "number",
-        "Natural",
-        TypeDefKind::Record(Record {
-            fields: vec![Field { name: "check".to_string(), ty: Type::Bool, docs: Default::default() }],
-        }),
-    );
-
-    let (i_id, i) = take_interface(&mut resolve, pid, "number");
-    i.functions.insert(
-        "test".to_string(),
-        Function {
-            name: "test".to_string(),
-            kind: FunctionKind::Freestanding,
-            params: vec![],
-            results: Results::Anon(t_nat),
-            docs: Default::default(),
-        },
-    );
-
-    let (w_id, w) = take_world(&mut resolve, pid, "native");
-    w.exports.insert(WorldKey::Interface(i_id), WorldItem::Interface(i_id));
-
-    for (_, item) in &resolve.worlds {
-        println!("Worlds: {:?}", item.name);
+impl ForeignGenerator {
+    pub fn build_rust<P: AsRef<Path>>(&self, dir: P) -> anyhow::Result<()> {
+        let path = ensure_dir(dir)?;
+        let mut builder =
+            wit_bindgen_rust::Opts { rustfmt: false, exports: self.ensure_export(), ..Default::default() }.build();
+        let mut files = Files::default();
+        builder.generate(&self.resolve, self.wid, &mut files)?;
+        for (name, content) in files.iter() {
+            let mut file = File::create(path.join(name))?;
+            file.write_all(content)?;
+        }
+        Ok(())
     }
-    for (_, item) in &resolve.types {
-        println!("Types: {:?}", item);
+    pub fn build_markdown<P: AsRef<Path>>(&self, dir: P) -> anyhow::Result<()> {
+        let path = ensure_dir(dir)?;
+        let mut builder = wit_bindgen_markdown::Opts::default().build();
+        let mut files = Files::default();
+        builder.generate(&self.resolve, self.wid, &mut files)?;
+        for (name, content) in files.iter() {
+            let mut file = File::create(path.join(name))?;
+            file.write_all(content)?;
+        }
+        Ok(())
     }
+    fn ensure_export(&self) -> HashMap<ExportKey, String> {
+        let mut exports = HashMap::default();
+        for (_, i) in &self.get_package().exports {
+            match i {
+                WorldItem::Interface(i) => match &self.get_module(*i).name {
+                    None => {}
+                    Some(s) => {
+                        exports.insert(ExportKey::Name(format!("{}:{}/{}", LANGUAGE_ID, self.package_name, s)), s.to_string());
+                    }
+                },
+                WorldItem::Function(_) => {}
+                WorldItem::Type(_) => {}
+            }
+        }
+        exports
+    }
+}
 
-    let here = Path::new(env!("CARGO_MANIFEST_DIR")).canonicalize()?;
-
-    resolve.build_rust(&here.join("tests/codegen"))?;
-
-    Ok(())
+fn ensure_dir<'i, P>(path: P) -> anyhow::Result<PathBuf>
+where
+    P: AsRef<Path> + 'i,
+{
+    let path = path.as_ref();
+    if !path.exists() {
+        std::fs::create_dir_all(path)?;
+    }
+    if !path.is_dir() {
+        anyhow::bail!("{} is not a directory", path.display());
+    }
+    Ok(path.canonicalize()?)
 }

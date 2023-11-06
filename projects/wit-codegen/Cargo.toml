@@ -1,16 +1,20 @@
 [package]
-name = "wit-image"
-publish = false
+name = "valkyrie-wit"
 version = "0.0.0"
+authors = ["Aster <192607617@qq.com>"]
+description = "..."
+repository = "https://github.com/oovm/sub_projects"
+documentation = "https://docs.rs/sub_projects"
+readme = "readme.md"
+license = "MPL-2.0"
 edition = "2021"
-
-[lib]
-crate-type = ["cdylib"]
+exclude = ["package.json", "tests/**"]
 
 [dependencies]
 indexmap = "2.1.0"
 anyhow = "1.0.75"
 id-arena = "2.2.1"
+wit-bindgen-markdown = "0.13.1"
 wit-bindgen-core = "0.13.1"
 wit-bindgen-rust = "0.13.2"
 
@@ -21,6 +25,3 @@ default = []
 
 [package.metadata.docs.rs]
 all-features = true
-
-[package.metadata.cargo-wasi]
-default-args = ["build", "--target", "wasm32-wasi"]
