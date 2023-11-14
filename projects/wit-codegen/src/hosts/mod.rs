@@ -1,4 +1,4 @@
-use convert_case::{Case, Casing};
+use heck::{ToKebabCase, ToUpperCamelCase};
 use id_arena::Id;
 use itertools::Itertools;
 use std::{
@@ -29,6 +29,7 @@ pub struct ForeignGenerator {
 impl ForeignGenerator {
     /// Create a new generator
     pub fn new(package: &str) -> anyhow::Result<Self> {
+        let package = package.to_kebab_case();
         let mut resolve = Resolve::default();
         let root = UnresolvedPackage::parse(
             &Path::new("<anonymous>"),
@@ -36,22 +37,23 @@ impl ForeignGenerator {
         )?;
         let pid = resolve.push(root)?;
         for (wid, w) in &resolve.worlds {
-            if w.name.eq(package) {
-                return Ok(Self { package_name: package.to_string(), pid, wid, map_module: Default::default(), resolve });
+            if w.name.eq(&package) {
+                return Ok(Self { package_name: package, pid, wid, map_module: Default::default(), resolve });
             }
         }
         unreachable!()
     }
     /// Get the language name and package infos
-    pub fn get_language(&self) -> &Package {
-        self.resolve.packages.get(self.pid).expect("")
+    pub fn clear_language(&mut self) {
+        let p = self.resolve.packages.get_mut(self.pid).expect("");
+        p.worlds.clear();
     }
     /// Get the package name and world infos
     pub fn get_package(&self) -> &World {
         self.resolve.worlds.get(self.wid).expect("")
     }
     pub fn make_module(&mut self, target: &[String]) -> Id<Interface> {
-        let target = target.iter().map(|v| v.to_case(Case::Kebab)).join("/");
+        let target = target.iter().map(|v| v.to_kebab_case()).join("/");
         if let Some(s) = self.map_module.get(&target) {
             return *s;
         }
@@ -68,7 +70,7 @@ impl ForeignGenerator {
         mid
     }
     pub fn make_function(&mut self, mid: Id<Interface>, mut f: Function) {
-        let name = f.name.to_case(Case::Kebab);
+        let name = f.name.to_kebab_case();
         f.name = name.clone();
         let module = self.mut_module(mid);
         module.functions.insert(name, f);
@@ -81,7 +83,7 @@ impl ForeignGenerator {
     }
     pub fn make_type(&mut self, mid: Id<Interface>, name: &str, kind: TypeDefKind) -> Id<TypeDef> {
         let tid = self.resolve.types.alloc(TypeDef {
-            name: Some(name.to_case(Case::Kebab)),
+            name: Some(name.to_kebab_case()),
             kind,
             owner: TypeOwner::Interface(mid),
             docs: Default::default(),
@@ -109,17 +111,7 @@ impl ForeignGenerator {
         let path = ensure_dir(dir)?;
         let mut builder =
             wit_bindgen_rust::Opts { rustfmt: false, exports: self.ensure_export(), ..Default::default() }.build();
-        let mut files = Files::default();
-        builder.generate(&self.resolve, self.wid, &mut files)?;
-        for (name, content) in files.iter() {
-            let mut file = File::create(path.join(name))?;
-            file.write_all(content)?;
-        }
-        Ok(())
-    }
-    pub fn build_markdown<P: AsRef<Path>>(&self, dir: P) -> anyhow::Result<()> {
-        let path = ensure_dir(dir)?;
-        let mut builder = wit_bindgen_markdown::Opts::default().build();
+
         let mut files = Files::default();
         builder.generate(&self.resolve, self.wid, &mut files)?;
         for (name, content) in files.iter() {
@@ -159,7 +151,7 @@ impl ForeignGenerator {
                     Some(s) => {
                         exports.insert(
                             ExportKey::Name(format!("{}:{}/{}", LANGUAGE_ID, self.package_name, s)),
-                            format!("{}Host", s),
+                            format!("{}FFI", s.to_upper_camel_case()),
                         );
                     }
                 },

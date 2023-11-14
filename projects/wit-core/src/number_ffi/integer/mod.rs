@@ -2,9 +2,9 @@ use super::*;
 
 /// unsigned integer buffer
 
-pub struct numberHost {}
+pub struct NumberFFI {}
 
-impl Guest for numberHost {
+impl Guest for NumberFFI {
     fn nat_new_u64(n: u64) -> Natural {
         todo!()
     }

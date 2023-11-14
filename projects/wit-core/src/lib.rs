@@ -10,6 +10,9 @@ include!("exports.rs");
 mod helper;
 pub mod image_ffi;
 mod number_ffi;
-pub mod text_ffi;
+mod text_ffi;
 
-pub use crate::number_ffi::{integer::numberHost, natural::NaturalHost};
+pub use crate::{
+    number_ffi::{integer::NumberFFI, natural::NaturalHost},
+    text_ffi::TextFFI,
+};

@@ -3,6 +3,7 @@
 <li>Exports:
 <ul>
 <li>interface <a href="#v:core_number"><code>v:core/number</code></a></li>
+<li>interface <a href="#v:core_text"><code>v:core/text</code></a></li>
 </ul>
 </li>
 </ul>
@@ -18,6 +19,9 @@
 </ul>
 <h4><a name="natural"><code>record Natural</code></a></h4>
 <h5>Record Fields</h5>
+<ul>
+<li><a name="natural.gc"><code>gc</code></a>: <code>u32</code></li>
+</ul>
 <h4><a name="integer"><code>record Integer</code></a></h4>
 <h5>Record Fields</h5>
 <ul>
@@ -26,30 +30,30 @@
 </ul>
 <hr />
 <h3>Functions</h3>
-<h4><a name="nat_new_u_64"><code>nat-new-u-64: func</code></a></h4>
+<h4><a name="nat_new_u64"><code>nat-new-u64: func</code></a></h4>
 <h5>Params</h5>
 <ul>
-<li><a name="nat_new_u_64.n"><code>n</code></a>: <code>u64</code></li>
+<li><a name="nat_new_u64.n"><code>n</code></a>: <code>u64</code></li>
 </ul>
 <h5>Return values</h5>
 <ul>
-<li><a name="nat_new_u_64.0"></a> <a href="#natural"><code>natural</code></a></li>
+<li><a name="nat_new_u64.0"></a> <a href="#natural"><code>natural</code></a></li>
 </ul>
-<h4><a name="nat_add_u_64"><code>nat-add-u-64: func</code></a></h4>
+<h4><a name="nat_add_u64"><code>nat-add-u64: func</code></a></h4>
 <h5>Params</h5>
 <ul>
-<li><a name="nat_add_u_64.this"><code>this</code></a>: <a href="#natural"><code>natural</code></a></li>
-<li><a name="nat_add_u_64.rhs"><code>rhs</code></a>: <code>u64</code></li>
+<li><a name="nat_add_u64.this"><code>this</code></a>: <a href="#natural"><code>natural</code></a></li>
+<li><a name="nat_add_u64.rhs"><code>rhs</code></a>: <code>u64</code></li>
 </ul>
 <h5>Return values</h5>
 <ul>
-<li><a name="nat_add_u_64.0"></a> <a href="#natural"><code>natural</code></a></li>
+<li><a name="nat_add_u64.0"></a> <a href="#natural"><code>natural</code></a></li>
 </ul>
-<h4><a name="nat_add_u_64_inplace"><code>nat-add-u-64-inplace: func</code></a></h4>
+<h4><a name="nat_add_u64_inplace"><code>nat-add-u64-inplace: func</code></a></h4>
 <h5>Params</h5>
 <ul>
-<li><a name="nat_add_u_64_inplace.this"><code>this</code></a>: <a href="#natural"><code>natural</code></a></li>
-<li><a name="nat_add_u_64_inplace.rhs"><code>rhs</code></a>: <code>u64</code></li>
+<li><a name="nat_add_u64_inplace.this"><code>this</code></a>: <a href="#natural"><code>natural</code></a></li>
+<li><a name="nat_add_u64_inplace.rhs"><code>rhs</code></a>: <code>u64</code></li>
 </ul>
 <h4><a name="nat_add_nat"><code>nat-add-nat: func</code></a></h4>
 <h5>Params</h5>
@@ -67,15 +71,15 @@
 <li><a name="nat_add_nat_inplace.this"><code>this</code></a>: <a href="#natural"><code>natural</code></a></li>
 <li><a name="nat_add_nat_inplace.rhs"><code>rhs</code></a>: <a href="#natural"><code>natural</code></a></li>
 </ul>
-<h4><a name="int_add_u_64"><code>int-add-u-64: func</code></a></h4>
+<h4><a name="int_add_u64"><code>int-add-u64: func</code></a></h4>
 <h5>Params</h5>
 <ul>
-<li><a name="int_add_u_64.this"><code>this</code></a>: <a href="#integer"><code>integer</code></a></li>
-<li><a name="int_add_u_64.rhs"><code>rhs</code></a>: <code>u64</code></li>
+<li><a name="int_add_u64.this"><code>this</code></a>: <a href="#integer"><code>integer</code></a></li>
+<li><a name="int_add_u64.rhs"><code>rhs</code></a>: <code>u64</code></li>
 </ul>
 <h5>Return values</h5>
 <ul>
-<li><a name="int_add_u_64.0"></a> <a href="#integer"><code>integer</code></a></li>
+<li><a name="int_add_u64.0"></a> <a href="#integer"><code>integer</code></a></li>
 </ul>
 <h4><a name="int_add_nat"><code>int-add-nat: func</code></a></h4>
 <h5>Params</h5>
@@ -96,4 +100,39 @@
 <h5>Return values</h5>
 <ul>
 <li><a name="int_add_int.0"></a> <a href="#integer"><code>integer</code></a></li>
+</ul>
+<h2><a name="v:core_text">Export interface v:core/text</a></h2>
+<hr />
+<h3>Types</h3>
+<h4><a name="ascii"><code>record Ascii</code></a></h4>
+<h5>Record Fields</h5>
+<ul>
+<li><a name="ascii.codepoint"><code>codepoint</code></a>: <code>u8</code></li>
+</ul>
+<h4><a name="unicode"><code>record Unicode</code></a></h4>
+<h5>Record Fields</h5>
+<ul>
+<li><a name="unicode.codepoint"><code>codepoint</code></a>: <code>u32</code></li>
+</ul>
+<hr />
+<h3>Functions</h3>
+<h4><a name="ascii_add_u8"><code>ascii-add-u8: func</code></a></h4>
+<h5>Params</h5>
+<ul>
+<li><a name="ascii_add_u8.this"><code>this</code></a>: <a href="#ascii"><code>ascii</code></a></li>
+<li><a name="ascii_add_u8.rhs"><code>rhs</code></a>: <code>u8</code></li>
+</ul>
+<h5>Return values</h5>
+<ul>
+<li><a name="ascii_add_u8.0"></a> <a href="#ascii"><code>ascii</code></a></li>
+</ul>
+<h4><a name="unicode_add_u32"><code>unicode-add-u32: func</code></a></h4>
+<h5>Params</h5>
+<ul>
+<li><a name="unicode_add_u32.this"><code>this</code></a>: <a href="#unicode"><code>unicode</code></a></li>
+<li><a name="unicode_add_u32.rhs"><code>rhs</code></a>: <code>u32</code></li>
+</ul>
+<h5>Return values</h5>
+<ul>
+<li><a name="unicode_add_u32.0"></a> <a href="#unicode"><code>unicode</code></a></li>
 </ul>

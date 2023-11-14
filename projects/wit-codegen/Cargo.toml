@@ -1,6 +1,6 @@
 [package]
 name = "valkyrie-wit"
-version = "0.0.0"
+version = "0.0.1"
 authors = ["Aster <192607617@qq.com>"]
 description = "Generate external type bindings for the valkyrie language"
 repository = "https://github.com/oovm/sub_projects"
@@ -12,16 +12,21 @@ exclude = ["package.json", "tests/**"]
 
 [dependencies]
 itertools = "0.11.0"
-convert_case = "0.6.0"
+heck = "0.4.1"
 indexmap = "2.1.0"
 anyhow = "1.0.75"
 id-arena = "2.2.1"
-wit-parser = "0.12.2"
-wit-bindgen-markdown = "0.13.1"
-wit-bindgen-core = "0.13.1"
-wit-bindgen-csharp = "0.13.1"
-wit-bindgen-teavm-java = "0.13.1"
-wit-bindgen-rust = "0.13.2"
+wit-parser = "0.13.0"
+wit-component = "0.18.0"
+wit-bindgen-core = "0.14.0"
+wit-bindgen-csharp = "0.14.0"
+wit-bindgen-teavm-java = "0.14.0"
+wit-bindgen-rust = "0.14.0"
+
+[dependencies.valkyrie-types]
+version = "0.0.*"
+path = 'C:\Users\Dell\CLionProjects\valkyrie.rs\projects\valkyrie-types'
+
 
 [dev-dependencies]
 
