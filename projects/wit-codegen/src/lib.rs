@@ -6,5 +6,6 @@
 
 mod helpers;
 mod hosts;
+mod parsers;
 
 pub use crate::hosts::ForeignGenerator;

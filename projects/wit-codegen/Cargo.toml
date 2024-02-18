@@ -27,6 +27,10 @@ wit-bindgen-rust = "0.14.0"
 version = "0.0.*"
 path = 'C:\Users\Dell\CLionProjects\valkyrie.rs\projects\valkyrie-types'
 
+[dependencies.valkyrie-parser]
+version = "0.2.*"
+path = 'C:\Users\Dell\CLionProjects\valkyrie.rs\projects\valkyrie-parser'
+
 
 [dev-dependencies]
 
