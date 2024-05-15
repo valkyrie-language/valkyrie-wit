@@ -1,9 +1,0 @@
-{
-    "private": true,
-    "scripts": {
-        "build": "cargo build --target wasm32-wasi",
-        "build:release": "cargo build --target wasm32-wasi --release",
-        "build:print": "wee build:release && wasm-tools print ../../target/wasm32-wasi/debug/valkyrie_ffi.wasm",
-        "p": "cargo publish --allow-dirty"
-    }
-}
