@@ -26,45 +26,39 @@ micro exit(status: Result<(), ()>) -> () { }
 #import("wasi:cli/run", "run")
 micro run() -> Result<(), ()> { }
 
-alias typus InputStream: InputStream { }
-
+alias typus InputStream = InputStream;
 #import("wasi:cli/stdin", "get-stdin")
 micro get_stdin() -> InputStream { }
 
-alias typus OutputStream: OutputStream { }
-
+alias typus OutputStream = OutputStream;
 #import("wasi:cli/stdout", "get-stdout")
 micro get_stdout() -> OutputStream { }
 
-alias typus OutputStream: OutputStream { }
-
+alias typus OutputStream = OutputStream;
 #import("wasi:cli/stderr", "get-stderr")
 micro get_stderr() -> OutputStream { }
 
 ⍝? The input side of a terminal.
 #import("wasi:cli/terminal-input", "terminal-input")
-class TerminalInput {
+resource class TerminalInput {
 }
 ⍝? The output side of a terminal.
 #import("wasi:cli/terminal-output", "terminal-output")
-class TerminalOutput {
+resource class TerminalOutput {
 }
-alias typus TerminalInput: TerminalInput { }
-
+alias typus TerminalInput = TerminalInput;
 ⍝? If stdin is connected to a terminal, return a `terminal-input` handle
 ⍝? allowing further interaction with it.
 #import("wasi:cli/terminal-stdin", "get-terminal-stdin")
 micro get_terminal_stdin() -> TerminalInput? { }
 
-alias typus TerminalOutput: TerminalOutput { }
-
+alias typus TerminalOutput = TerminalOutput;
 ⍝? If stdout is connected to a terminal, return a `terminal-output` handle
 ⍝? allowing further interaction with it.
 #import("wasi:cli/terminal-stdout", "get-terminal-stdout")
 micro get_terminal_stdout() -> TerminalOutput? { }
 
-alias typus TerminalOutput: TerminalOutput { }
-
+alias typus TerminalOutput = TerminalOutput;
 ⍝? If stderr is connected to a terminal, return a `terminal-output` handle
 ⍝? allowing further interaction with it.
 #import("wasi:cli/terminal-stderr", "get-terminal-stderr")

@@ -18,7 +18,7 @@
 ⍝? The set of functions which can "downcast" an `error` into a more
 ⍝? concrete type is open.
 #import("wasi:io/error", "error")
-class Error {
+resource class Error {
     ⍝? Returns a string that is suitable to assist humans in debugging
     ⍝? this error.
     ⍝? 
@@ -32,7 +32,7 @@ class Error {
 }
 ⍝? `pollable` represents a single I/O event which may be ready, or not.
 #import("wasi:io/poll", "pollable")
-class Pollable {
+resource class Pollable {
     ⍝? Return the readiness of a pollable. This function never blocks.
     ⍝? 
     ⍝? Returns `true` when the pollable is ready, and `false` otherwise.
@@ -69,10 +69,8 @@ class Pollable {
 #import("wasi:io/poll", "poll")
 micro poll(`in`: Array<&Pollable>) -> Array<u32> { }
 
-alias typus Error: Error { }
-
-alias typus Pollable: Pollable { }
-
+alias typus Error = Error;
+alias typus Pollable = Pollable;
 ⍝? An error for input-stream and output-stream operations.
 unite StreamError {
     ⍝? The last operation (a write or flush) failed before completion.
@@ -98,7 +96,7 @@ unite StreamError {
 ⍝? use the `subscribe` function to obtain a `pollable` which can be polled
 ⍝? for using `wasi:io/poll`.
 #import("wasi:io/streams", "input-stream")
-class InputStream {
+resource class InputStream {
     ⍝? Perform a non-blocking read from the stream.
     ⍝? 
     ⍝? When the source of a `read` is binary data, the bytes from the source
@@ -164,7 +162,7 @@ class InputStream {
 ⍝? accept data, the `subscribe` function to obtain a `pollable` which can be
 ⍝? polled for using `wasi:io/poll`.
 #import("wasi:io/streams", "output-stream")
-class OutputStream {
+resource class OutputStream {
     ⍝? Check readiness for writing. This function never blocks.
     ⍝? 
     ⍝? Returns the number of bytes permitted for the next call to `write`,

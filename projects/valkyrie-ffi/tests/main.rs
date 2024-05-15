@@ -1,5 +1,5 @@
 use std::path::Path;
-use valkyrie_wit::ValkyrieFFI;
+use valkyrie_ffi::ValkyrieFFI;
 
 #[test]
 fn ready() {

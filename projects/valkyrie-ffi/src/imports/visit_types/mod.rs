@@ -9,7 +9,7 @@ impl ValkyrieFFI {
         match &ctx.def.name {
             Some(wasi_name) => {
                 writeln!(file, "#import(\"{}\", \"{}\")", ctx.namespace, wasi_name)?;
-                writeln!(file, "class {} {{", wasi_name.to_case(Case::UpperCamel))?;
+                writeln!(file, "resource class {} {{", wasi_name.to_case(Case::UpperCamel))?;
                 for function in ctx.interface.functions.values() {
                     function
                         .write_define(file, FunctionContext { ffi: &self, class_name: wasi_name, namespace: ctx.namespace })?
@@ -46,24 +46,24 @@ impl WriteDefine for TypeDefKind {
             }
             Self::Enum(v) => v.write_define(w, TypeContext { wasi_name, ..ctx })?,
             Self::Type(v) => {
-                write!(w, "alias typus {}: ", wasi_name.to_case(Case::UpperCamel))?;
+                write!(w, "alias typus {} = ", wasi_name.to_case(Case::UpperCamel))?;
                 v.write_reference(w, ctx.ffi)?;
-                w.write_str(" { }\n\n")?;
+                w.write_str(";\n")?;
             }
             Self::List(v) => {
-                write!(w, "alias typus {}: Array<", wasi_name.to_case(Case::UpperCamel))?;
+                write!(w, "alias typus {} = Array<", wasi_name.to_case(Case::UpperCamel))?;
                 v.write_reference(w, ctx.ffi)?;
-                w.write_str("> { }\n\n")?;
+                w.write_str(">;\n")?;
             }
             Self::Tuple(v) => {
-                write!(w, "alias typus {}: (", wasi_name.to_case(Case::UpperCamel))?;
+                write!(w, "alias typus {} = (", wasi_name.to_case(Case::UpperCamel))?;
                 for (i, ty) in v.types.iter().enumerate() {
                     if i != 0 {
                         w.write_str(", ")?;
                     }
                     ty.write_reference(w, ctx.ffi)?;
                 }
-                w.write_str(") { }\n\n")?
+                w.write_str(");\n")?
             }
             Self::Handle(_) => unimplemented!(),
             Self::Option(_) => unimplemented!(),

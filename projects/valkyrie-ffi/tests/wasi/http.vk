@@ -1,13 +1,8 @@
-alias typus Duration: u64 { }
-
-alias typus InputStream: InputStream { }
-
-alias typus OutputStream: OutputStream { }
-
-alias typus IoError: Error { }
-
-alias typus Pollable: Pollable { }
-
+alias typus Duration = u64;
+alias typus InputStream = InputStream;
+alias typus OutputStream = OutputStream;
+alias typus IoError = Error;
+alias typus Pollable = Pollable;
 ⍝? This type corresponds to HTTP standard Methods.
 unite Method {
     #export("get")
@@ -201,13 +196,11 @@ unite HeaderError {
 }
 
 ⍝? Field keys are always strings.
-alias typus FieldKey: utf8 { }
-
+alias typus FieldKey = utf8;
 ⍝? Field values should always be ASCII strings. However, in
 ⍝? reality, HTTP implementations often have to interpret malformed values,
 ⍝? so they are provided as a list of bytes.
-alias typus FieldValue: Array<u8> { }
-
+alias typus FieldValue = Array<u8>;
 ⍝? This following block defines the `fields` resource which corresponds to
 ⍝? HTTP standard Fields. Fields are a common representation used for both
 ⍝? Headers and Trailers.
@@ -219,7 +212,7 @@ alias typus FieldValue: Array<u8> { }
 ⍝? immutable. In an immutable fields, the `set`, `append`, and `delete`
 ⍝? operations will fail with `header-error.immutable`.
 #import("wasi:http/types", "fields")
-class Fields {
+resource class Fields {
     ⍝? Construct an empty HTTP Fields.
     ⍝? 
     ⍝? The resulting `fields` is mutable.
@@ -326,14 +319,12 @@ class Fields {
 
 }
 ⍝? Headers is an alias for Fields.
-alias typus Headers: Fields { }
-
+alias typus Headers = Fields;
 ⍝? Trailers is an alias for Fields.
-alias typus Trailers: Fields { }
-
+alias typus Trailers = Fields;
 ⍝? Represents an incoming HTTP Request.
 #import("wasi:http/types", "incoming-request")
-class IncomingRequest {
+resource class IncomingRequest {
     ⍝? Construct an empty HTTP Fields.
     ⍝? 
     ⍝? The resulting `fields` is mutable.
@@ -400,7 +391,7 @@ class IncomingRequest {
 }
 ⍝? Represents an outgoing HTTP Request.
 #import("wasi:http/types", "outgoing-request")
-class OutgoingRequest {
+resource class OutgoingRequest {
     ⍝? Construct an empty HTTP Fields.
     ⍝? 
     ⍝? The resulting `fields` is mutable.
@@ -504,7 +495,7 @@ class OutgoingRequest {
 ⍝? These timeouts are separate from any the user may use to bound a
 ⍝? blocking call to `wasi:io/poll.poll`.
 #import("wasi:http/types", "request-options")
-class RequestOptions {
+resource class RequestOptions {
     ⍝? Construct an empty HTTP Fields.
     ⍝? 
     ⍝? The resulting `fields` is mutable.
@@ -572,7 +563,7 @@ class RequestOptions {
 ⍝? allow a Response to be sent corresponding to the Request provided as the
 ⍝? other argument to `incoming-handler.handle`.
 #import("wasi:http/types", "response-outparam")
-class ResponseOutparam {
+resource class ResponseOutparam {
     ⍝? Construct an empty HTTP Fields.
     ⍝? 
     ⍝? The resulting `fields` is mutable.
@@ -618,11 +609,10 @@ class ResponseOutparam {
 
 }
 ⍝? This type corresponds to the HTTP standard Status Code.
-alias typus StatusCode: u16 { }
-
+alias typus StatusCode = u16;
 ⍝? Represents an incoming HTTP Response.
 #import("wasi:http/types", "incoming-response")
-class IncomingResponse {
+resource class IncomingResponse {
     ⍝? Construct an empty HTTP Fields.
     ⍝? 
     ⍝? The resulting `fields` is mutable.
@@ -683,7 +673,7 @@ class IncomingResponse {
 ⍝? and ensures that the user of this interface may only be consuming either
 ⍝? the body contents or waiting on trailers at any given time.
 #import("wasi:http/types", "incoming-body")
-class IncomingBody {
+resource class IncomingBody {
     ⍝? Construct an empty HTTP Fields.
     ⍝? 
     ⍝? The resulting `fields` is mutable.
@@ -745,7 +735,7 @@ class IncomingBody {
 ⍝? trailers, this future will resolve to the empty set of trailers once the
 ⍝? complete Request or Response body has been received.
 #import("wasi:http/types", "future-trailers")
-class FutureTrailers {
+resource class FutureTrailers {
     ⍝? Construct an empty HTTP Fields.
     ⍝? 
     ⍝? The resulting `fields` is mutable.
@@ -808,7 +798,7 @@ class FutureTrailers {
 }
 ⍝? Represents an outgoing HTTP Response.
 #import("wasi:http/types", "outgoing-response")
-class OutgoingResponse {
+resource class OutgoingResponse {
     ⍝? Construct an empty HTTP Fields.
     ⍝? 
     ⍝? The resulting `fields` is mutable.
@@ -886,7 +876,7 @@ class OutgoingResponse {
 ⍝? including: corrupting the body on the wire, aborting the associated
 ⍝? Request, or sending a late status code for the Response.
 #import("wasi:http/types", "outgoing-body")
-class OutgoingBody {
+resource class OutgoingBody {
     ⍝? Construct an empty HTTP Fields.
     ⍝? 
     ⍝? The resulting `fields` is mutable.
@@ -949,7 +939,7 @@ class OutgoingBody {
 ⍝? This resource is returned by the `wasi:http/outgoing-handler` interface to
 ⍝? provide the HTTP Response corresponding to the sent Request.
 #import("wasi:http/types", "future-incoming-response")
-class FutureIncomingResponse {
+resource class FutureIncomingResponse {
     ⍝? Construct an empty HTTP Fields.
     ⍝? 
     ⍝? The resulting `fields` is mutable.
@@ -1050,10 +1040,8 @@ micro http_error_code(err: &Error) -> ErrorCode? { }
     #import("wasi:http/types", "[constructor]outgoing-response")
     outgoing_response(headers: Fields) -> OutgoingResponse { }
 
-alias typus IncomingRequest: IncomingRequest { }
-
-alias typus ResponseOutparam: ResponseOutparam { }
-
+alias typus IncomingRequest = IncomingRequest;
+alias typus ResponseOutparam = ResponseOutparam;
 ⍝? This function is invoked with an incoming HTTP Request, and a resource
 ⍝? `response-outparam` which provides the capability to reply with an HTTP
 ⍝? Response. The response is sent by calling the `response-outparam.set`
@@ -1067,14 +1055,10 @@ alias typus ResponseOutparam: ResponseOutparam { }
 #import("wasi:http/incoming-handler", "handle")
 micro handle(request: IncomingRequest, response_out: ResponseOutparam) -> () { }
 
-alias typus OutgoingRequest: OutgoingRequest { }
-
-alias typus RequestOptions: RequestOptions { }
-
-alias typus FutureIncomingResponse: FutureIncomingResponse { }
-
-alias typus ErrorCode: ErrorCode { }
-
+alias typus OutgoingRequest = OutgoingRequest;
+alias typus RequestOptions = RequestOptions;
+alias typus FutureIncomingResponse = FutureIncomingResponse;
+alias typus ErrorCode = ErrorCode;
 ⍝? This function is invoked with an outgoing HTTP Request, and it returns
 ⍝? a resource `future-incoming-response` which represents an HTTP Response
 ⍝? which may arrive in the future.

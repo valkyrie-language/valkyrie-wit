@@ -2,7 +2,7 @@
 ⍝? This enables context-based security for networking.
 ⍝? There is no need for this to map 1:1 to a physical network interface.
 #import("wasi:sockets/network", "network")
-class Network {
+resource class Network {
 }
 ⍝? Error codes.
 ⍝? 
@@ -108,10 +108,8 @@ enumerate IpAddressFamily {
     Ipv6,
 }
 
-alias typus Ipv4Address: (u8, u8, u8, u8) { }
-
-alias typus Ipv6Address: (u16, u16, u16, u16, u16, u16, u16, u16) { }
-
+alias typus Ipv4Address = (u8, u8, u8, u8);
+alias typus Ipv6Address = (u16, u16, u16, u16, u16, u16, u16, u16);
 unite IpAddress {
     #export("ipv4")
     Ipv4 {
@@ -152,22 +150,17 @@ unite IpSocketAddress {
     },
 }
 
-alias typus Network: Network { }
-
+alias typus Network = Network;
 ⍝? Get a handle to the default network.
 #import("wasi:sockets/instance-network", "instance-network")
 micro instance_network() -> Network { }
 
-alias typus Pollable: Pollable { }
-
-alias typus Network: Network { }
-
-alias typus ErrorCode: ErrorCode { }
-
-alias typus IpAddress: IpAddress { }
-
+alias typus Pollable = Pollable;
+alias typus Network = Network;
+alias typus ErrorCode = ErrorCode;
+alias typus IpAddress = IpAddress;
 #import("wasi:sockets/ip-name-lookup", "resolve-address-stream")
-class ResolveAddressStream {
+resource class ResolveAddressStream {
     ⍝? Returns the next address from the resolver.
     ⍝? 
     ⍝? This function should be called multiple times. On each call, it will
@@ -215,22 +208,14 @@ class ResolveAddressStream {
 #import("wasi:sockets/ip-name-lookup", "resolve-addresses")
 micro resolve_addresses(network: &Network, name: utf8) -> Result<ResolveAddressStream, ErrorCode> { }
 
-alias typus InputStream: InputStream { }
-
-alias typus OutputStream: OutputStream { }
-
-alias typus Pollable: Pollable { }
-
-alias typus Duration: u64 { }
-
-alias typus Network: Network { }
-
-alias typus ErrorCode: ErrorCode { }
-
-alias typus IpSocketAddress: IpSocketAddress { }
-
-alias typus IpAddressFamily: IpAddressFamily { }
-
+alias typus InputStream = InputStream;
+alias typus OutputStream = OutputStream;
+alias typus Pollable = Pollable;
+alias typus Duration = u64;
+alias typus Network = Network;
+alias typus ErrorCode = ErrorCode;
+alias typus IpSocketAddress = IpSocketAddress;
+alias typus IpAddressFamily = IpAddressFamily;
 enumerate ShutdownType {
     ⍝? Similar to `SHUT_RD` in POSIX.
     #export("receive")
@@ -265,7 +250,7 @@ enumerate ShutdownType {
 ⍝? `network::error-code` type, TCP socket methods may always return
 ⍝? `error(invalid-state)` when in the `closed` state.
 #import("wasi:sockets/tcp", "tcp-socket")
-class TcpSocket {
+resource class TcpSocket {
     ⍝? Bind the socket to a specific network on the provided IP address and port.
     ⍝? 
     ⍝? If the IP address is zero (`0.0.0.0` in IPv4, `::` in IPv6), it is left to the implementation to decide which
@@ -618,14 +603,10 @@ class TcpSocket {
     shutdown(self, shutdown_type: ShutdownType) -> Result<(), ErrorCode> { }
 
 }
-alias typus Network: Network { }
-
-alias typus ErrorCode: ErrorCode { }
-
-alias typus IpAddressFamily: IpAddressFamily { }
-
-alias typus TcpSocket: TcpSocket { }
-
+alias typus Network = Network;
+alias typus ErrorCode = ErrorCode;
+alias typus IpAddressFamily = IpAddressFamily;
+alias typus TcpSocket = TcpSocket;
 ⍝? Create a new TCP socket.
 ⍝? 
 ⍝? Similar to `socket(AF_INET or AF_INET6, SOCK_STREAM, IPPROTO_TCP)` in POSIX.
@@ -649,16 +630,11 @@ alias typus TcpSocket: TcpSocket { }
 #import("wasi:sockets/tcp-create-socket", "create-tcp-socket")
 micro create_tcp_socket(address_family: IpAddressFamily) -> Result<TcpSocket, ErrorCode> { }
 
-alias typus Pollable: Pollable { }
-
-alias typus Network: Network { }
-
-alias typus ErrorCode: ErrorCode { }
-
-alias typus IpSocketAddress: IpSocketAddress { }
-
-alias typus IpAddressFamily: IpAddressFamily { }
-
+alias typus Pollable = Pollable;
+alias typus Network = Network;
+alias typus ErrorCode = ErrorCode;
+alias typus IpSocketAddress = IpSocketAddress;
+alias typus IpAddressFamily = IpAddressFamily;
 ⍝? A received datagram.
 class IncomingDatagram {
     ⍝? The payload.
@@ -689,7 +665,7 @@ class OutgoingDatagram {
 
 ⍝? A UDP socket handle.
 #import("wasi:sockets/udp", "udp-socket")
-class UdpSocket {
+resource class UdpSocket {
     ⍝? Bind the socket to a specific network on the provided IP address and port.
     ⍝? 
     ⍝? If the IP address is zero (`0.0.0.0` in IPv4, `::` in IPv6), it is left to the implementation to decide which
@@ -846,7 +822,7 @@ class UdpSocket {
 
 }
 #import("wasi:sockets/udp", "incoming-datagram-stream")
-class IncomingDatagramStream {
+resource class IncomingDatagramStream {
     ⍝? Receive messages on the socket.
     ⍝? 
     ⍝? This function attempts to receive up to `max-results` datagrams on the socket without blocking.
@@ -882,7 +858,7 @@ class IncomingDatagramStream {
 
 }
 #import("wasi:sockets/udp", "outgoing-datagram-stream")
-class OutgoingDatagramStream {
+resource class OutgoingDatagramStream {
     ⍝? Check readiness for sending. This function never blocks.
     ⍝? 
     ⍝? Returns the number of datagrams permitted for the next call to `send`,
@@ -942,14 +918,10 @@ class OutgoingDatagramStream {
     subscribe(self) -> Pollable { }
 
 }
-alias typus Network: Network { }
-
-alias typus ErrorCode: ErrorCode { }
-
-alias typus IpAddressFamily: IpAddressFamily { }
-
-alias typus UdpSocket: UdpSocket { }
-
+alias typus Network = Network;
+alias typus ErrorCode = ErrorCode;
+alias typus IpAddressFamily = IpAddressFamily;
+alias typus UdpSocket = UdpSocket;
 ⍝? Create a new UDP socket.
 ⍝? 
 ⍝? Similar to `socket(AF_INET or AF_INET6, SOCK_DGRAM, IPPROTO_UDP)` in POSIX.

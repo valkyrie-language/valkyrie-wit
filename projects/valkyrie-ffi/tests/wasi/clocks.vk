@@ -1,13 +1,10 @@
-alias typus Pollable: Pollable { }
-
+alias typus Pollable = Pollable;
 ⍝? An instant in time, in nanoseconds. An instant is relative to an
 ⍝? unspecified initial value, and can only be compared to instances from
 ⍝? the same monotonic-clock.
-alias typus Instant: u64 { }
-
+alias typus Instant = u64;
 ⍝? A duration of time, in nanoseconds.
-alias typus Duration: u64 { }
-
+alias typus Duration = u64;
 ⍝? Read the current value of the clock.
 ⍝? 
 ⍝? The clock is monotonic, therefore calling this function repeatedly will

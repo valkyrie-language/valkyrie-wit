@@ -61,7 +61,7 @@ class Row {
 ⍝? allows parameterized queries
 ⍝? e.g., prepare("SELECT * FROM users WHERE name = ? AND age = ?", vec!["John Doe", "32"])
 #import("wasi:sql/types", "statement")
-class Statement {
+resource class Statement {
     #import("wasi:sql/types", "[static]statement.prepare")
     prepare(query: utf8, params: Array<utf8>) -> Result<Statement, Error> { }
 
@@ -70,26 +70,22 @@ class Statement {
 ⍝? Currently, this provides only one function to return a string representation
 ⍝? of the error. In the future, this will be extended to provide more information.
 #import("wasi:sql/types", "error")
-class Error {
+resource class Error {
     #import("wasi:sql/types", "[method]error.trace")
     trace(self) -> utf8 { }
 
 }
 ⍝? A connection to a sql store.
 #import("wasi:sql/types", "connection")
-class Connection {
+resource class Connection {
     #import("wasi:sql/types", "[static]connection.open")
     open(name: utf8) -> Result<Connection, Error> { }
 
 }
-alias typus Statement: Statement { }
-
-alias typus Row: Row { }
-
-alias typus Error: Error { }
-
-alias typus Connection: Connection { }
-
+alias typus Statement = Statement;
+alias typus Row = Row;
+alias typus Error = Error;
+alias typus Connection = Connection;
 ⍝? query is optimized for querying data, and
 ⍝? implementors can make use of that fact to optimize
 ⍝? the performance of query execution (e.g., using

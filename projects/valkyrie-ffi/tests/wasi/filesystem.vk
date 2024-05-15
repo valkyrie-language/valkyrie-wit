@@ -1,14 +1,9 @@
-alias typus InputStream: InputStream { }
-
-alias typus OutputStream: OutputStream { }
-
-alias typus Error: Error { }
-
-alias typus Datetime: Datetime { }
-
+alias typus InputStream = InputStream;
+alias typus OutputStream = OutputStream;
+alias typus Error = Error;
+alias typus Datetime = Datetime;
 ⍝? File size or length of a region within a file.
-alias typus Filesize: u64 { }
-
+alias typus Filesize = u64;
 ⍝? The type of a filesystem object referenced by a descriptor.
 ⍝? 
 ⍝? Note: This was called `filetype` in earlier versions of WASI.
@@ -114,8 +109,7 @@ flags OpenFlags {
 }
 
 ⍝? Number of hard links to an inode.
-alias typus LinkCount: u64 { }
-
+alias typus LinkCount = u64;
 ⍝? File attributes.
 ⍝? 
 ⍝? Note: This was called `filestat` in earlier versions of WASI.
@@ -327,7 +321,7 @@ class MetadataHashValue {
 ⍝? directory, named pipe, special file, or other object on which filesystem
 ⍝? calls may be made.
 #import("wasi:filesystem/types", "descriptor")
-class Descriptor {
+resource class Descriptor {
     ⍝? Return a stream for reading from a file, if available.
     ⍝? 
     ⍝? May fail with an error-code describing why the file cannot be read.
@@ -600,7 +594,7 @@ class Descriptor {
 }
 ⍝? A stream of directory entries.
 #import("wasi:filesystem/types", "directory-entry-stream")
-class DirectoryEntryStream {
+resource class DirectoryEntryStream {
     ⍝? Read a single directory entry from a `directory-entry-stream`.
     #import("wasi:filesystem/types", "[method]directory-entry-stream.read-directory-entry")
     read_directory_entry(self) -> Result<DirectoryEntry?, ErrorCode> { }
@@ -619,8 +613,7 @@ class DirectoryEntryStream {
 #import("wasi:filesystem/types", "filesystem-error-code")
 micro filesystem_error_code(err: &Error) -> ErrorCode? { }
 
-alias typus Descriptor: Descriptor { }
-
+alias typus Descriptor = Descriptor;
 ⍝? Return the set of preopened directories, and their path.
 #import("wasi:filesystem/preopens", "get-directories")
 micro get_directories() -> Array<(Descriptor, utf8)> { }
