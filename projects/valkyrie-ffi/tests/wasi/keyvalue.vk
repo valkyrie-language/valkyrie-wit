@@ -1,0 +1,397 @@
+⍝? An error resource type for keyvalue operations.
+⍝? 
+⍝? Common errors:
+⍝? - Connectivity errors (e.g. network errors): when the client cannot establish
+⍝? a connection to the keyvalue service.
+⍝? - Authentication and Authorization errors: when the client fails to authenticate
+⍝? or does not have the required permissions to perform the operation.
+⍝? - Data errors: when the client sends incompatible or corrupted data.
+⍝? - Resource errors: when the system runs out of resources (e.g. memory).
+⍝? - Internal errors: unexpected errors on the server side.
+⍝? 
+⍝? Currently, this provides only one function to return a string representation
+⍝? of the error. In the future, this will be extended to provide more information
+⍝? about the error.
+⍝? Soon: switch to `resource error { ... }`
+#import("wasi:keyvalue/wasi-keyvalue-error", "error")
+class Error {
+    #import("wasi:keyvalue/wasi-keyvalue-error", "[method]error.trace")
+    trace(self) -> utf8 { }
+
+}
+alias typus InputStream: InputStream { }
+
+alias typus OutputStream: OutputStream { }
+
+alias typus Error: Error { }
+
+⍝? A bucket is a collection of key-value pairs. Each key-value pair is stored
+⍝? as a entry in the bucket, and the bucket itself acts as a collection of all
+⍝? these entries.
+⍝? 
+⍝? It is worth noting that the exact terminology for bucket in key-value stores
+⍝? can very depending on the specific implementation. For example,
+⍝? 1. Amazon DynamoDB calls a collection of key-value pairs a table
+⍝? 2. Redis has hashes, sets, and sorted sets as different types of collections
+⍝? 3. Cassandra calls a collection of key-value pairs a column family
+⍝? 4. MongoDB calls a collection of key-value pairs a collection
+⍝? 5. Riak calls a collection of key-value pairs a bucket
+⍝? 6. Memcached calls a collection of key-value pairs a slab
+⍝? 7. Azure Cosmos DB calls a collection of key-value pairs a container
+⍝? 
+⍝? In this interface, we use the term `bucket` to refer to a collection of key-value
+⍝? Soon: switch to `resource bucket { ... }`
+#import("wasi:keyvalue/types", "bucket")
+class Bucket {
+    ⍝? Opens a bucket with the given name.
+    ⍝? 
+    ⍝? If any error occurs, including if the bucket does not exist, it returns an `Err(error)`.
+    #import("wasi:keyvalue/types", "[static]bucket.open-bucket")
+    open_bucket(name: utf8) -> Result<Bucket, Error> { }
+
+}
+⍝? A key is a unique identifier for a value in a bucket. The key is used to
+⍝? retrieve the value from the bucket.
+alias typus Key: utf8 { }
+
+⍝? A value is the data stored in a key-value pair. The value can be of any type
+⍝? that can be represented in a byte array. It provides a way to write the value
+⍝? to the output-stream defined in the `wasi-io` interface.
+⍝? Soon: switch to `resource value { ... }`
+#import("wasi:keyvalue/types", "outgoing-value")
+class OutgoingValue {
+    #import("wasi:keyvalue/types", "[static]outgoing-value.new-outgoing-value")
+    new_outgoing_value() -> OutgoingValue { }
+
+    ⍝? Writes the value to the output-stream asynchronously.
+    ⍝? If any other error occurs, it returns an `Err(error)`.
+    #import("wasi:keyvalue/types", "[method]outgoing-value.outgoing-value-write-body-async")
+    outgoing_value_write_body_async(self) -> Result<OutputStream, Error> { }
+
+    ⍝? Writes the value to the output-stream synchronously.
+    ⍝? If any other error occurs, it returns an `Err(error)`.
+    #import("wasi:keyvalue/types", "[method]outgoing-value.outgoing-value-write-body-sync")
+    outgoing_value_write_body_sync(self, value: Array<u8>) -> Result<(), Error> { }
+
+}
+alias typus OutgoingValueBodyAsync: OutputStream { }
+
+alias typus OutgoingValueBodySync: Array<u8> { }
+
+⍝? A incoming-value is a wrapper around a value. It provides a way to read the value
+⍝? from the `input-stream` defined in the `wasi-io` interface.
+⍝? 
+⍝? The incoming-value provides two ways to consume the value:
+⍝? 1. `incoming-value-consume-sync` consumes the value synchronously and returns the
+⍝? value as a `list<u8>`.
+⍝? 2. `incoming-value-consume-async` consumes the value asynchronously and returns the
+⍝? value as an `input-stream`.
+⍝? In addition, it provides a `incoming-value-size` function to get the size of the value.
+⍝? This is useful when the value is large and the caller wants to allocate a buffer of
+⍝? the right size to consume the value.
+⍝? Soon: switch to `resource incoming-value { ... }`
+#import("wasi:keyvalue/types", "incoming-value")
+class IncomingValue {
+    ⍝? Consumes the value synchronously and returns the value as a list of bytes.
+    ⍝? If any other error occurs, it returns an `Err(error)`.
+    #import("wasi:keyvalue/types", "[static]incoming-value.incoming-value-consume-sync")
+    incoming_value_consume_sync(this: IncomingValue) -> Result<Array<u8>, Error> { }
+
+    ⍝? Consumes the value asynchronously and returns the value as an `input-stream`.
+    ⍝? If any other error occurs, it returns an `Err(error)`.
+    #import("wasi:keyvalue/types", "[static]incoming-value.incoming-value-consume-async")
+    incoming_value_consume_async(this: IncomingValue) -> Result<InputStream, Error> { }
+
+    ⍝? The size of the value in bytes.
+    ⍝? If the size is unknown or unavailable, this function returns an `Err(error)`.
+    #import("wasi:keyvalue/types", "[method]incoming-value.incoming-value-size")
+    incoming_value_size(self) -> Result<u64, Error> { }
+
+}
+alias typus IncomingValueAsyncBody: InputStream { }
+
+alias typus IncomingValueSyncBody: Array<u8> { }
+
+alias typus Bucket: Bucket { }
+
+alias typus Error: Error { }
+
+alias typus Key: utf8 { }
+
+⍝? Atomically increment the value associated with the key in the bucket by the
+⍝? given delta. It returns the new value.
+⍝? 
+⍝? If the key does not exist in the bucket, it creates a new key-value pair
+⍝? with the value set to the given delta.
+⍝? 
+⍝? If any other error occurs, it returns an `Err(error)`.
+#import("wasi:keyvalue/atomic", "increment")
+micro increment(bucket: &Bucket, key: utf8, delta: u64) -> Result<u64, Error> { }
+
+⍝? Compare-and-swap (CAS) atomically updates the value associated with the key
+⍝? in the bucket if the value matches the old value. This operation returns
+⍝? `Ok(true)` if the swap was successful, `Ok(false)` if the value did not match,
+⍝? 
+⍝? A successful CAS operation means the current value matched the `old` value
+⍝? and was replaced with the `new` value.
+⍝? 
+⍝? If the key does not exist in the bucket, it returns `Ok(false)`.
+⍝? 
+⍝? If any other error occurs, it returns an `Err(error)`.
+#import("wasi:keyvalue/atomic", "compare-and-swap")
+micro compare_and_swap(bucket: &Bucket, key: utf8, old: u64, new: u64) -> Result<bool, Error> { }
+
+alias typus Pollable: Pollable { }
+
+alias typus Key: utf8 { }
+
+alias typus IncomingValue: IncomingValue { }
+
+alias typus OutgoingValue: OutgoingValue { }
+
+alias typus Error: Error { }
+
+⍝? This block defines a special resource type used by `get` to emulate
+⍝? `future<result<option<incoming-value>,error>>`. In the return value
+⍝? of the `get` method, the outer `option` returns `none` when the pollable
+⍝? is not yet ready and the inner `option` returns `none` when the
+⍝? requested key wasn't present.
+#import("wasi:keyvalue/cache", "future-get-result")
+class FutureGetResult {
+    #import("wasi:keyvalue/cache", "[method]future-get-result.future-get-result-get")
+    future_get_result_get(self) -> Result<IncomingValue?, Error>? { }
+
+    #import("wasi:keyvalue/cache", "[method]future-get-result.listen-to-future-get-result")
+    listen_to_future_get_result(self) -> Pollable { }
+
+}
+⍝? This block defines a special resource type used by `exists` to emulate
+⍝? `future<result<bool,error>>`.
+#import("wasi:keyvalue/cache", "future-exists-result")
+class FutureExistsResult {
+    #import("wasi:keyvalue/cache", "[method]future-exists-result.future-exists-result-get")
+    future_exists_result_get(self) -> Result<bool, Error>? { }
+
+    #import("wasi:keyvalue/cache", "[method]future-exists-result.listen-to-future-exists-result")
+    listen_to_future_exists_result(self) -> Pollable { }
+
+}
+⍝? This block defines a special resource type used by `set` and `delete` to
+⍝? emulate `future<result<_,error>>`.
+#import("wasi:keyvalue/cache", "future-result")
+class FutureResult {
+    #import("wasi:keyvalue/cache", "[method]future-result.future-result-get")
+    future_result_get(self) -> Result<(), Error>? { }
+
+    #import("wasi:keyvalue/cache", "[method]future-result.listen-to-future-result")
+    listen_to_future_result(self) -> Pollable { }
+
+}
+⍝? This block defines a special resource type used by `get-or-set` to
+⍝? emulate `future<result<get-or-set-entry,error>>`.
+#import("wasi:keyvalue/cache", "future-get-or-set-result")
+class FutureGetOrSetResult {
+    #import("wasi:keyvalue/cache", "[method]future-get-or-set-result.future-get-or-set-result-get")
+    future_get_or_set_result_get(self) -> Result<GetOrSetEntry, Error>? { }
+
+    #import("wasi:keyvalue/cache", "[method]future-get-or-set-result.listen-to-future-get-or-set-result")
+    listen_to_future_get_or_set_result(self) -> Pollable { }
+
+}
+⍝? The following block defines the `vacancy` resource type. (When resource
+⍝? types are added, the `u32` type aliases can be replaced by proper
+⍝? `resource` types.) When the caller of `get-or-set` receives a `vacancy`,
+⍝? they must either call the `fill` method or drop the `vacancy` to
+⍝? indicate an error that prevents calling `fill`. An implementation MAY
+⍝? have a timeout that drops a vacancy that hasn't been filled in order
+⍝? to unblock other waiting `get-or-set` callers.
+#import("wasi:keyvalue/cache", "vacancy")
+class Vacancy {
+    #import("wasi:keyvalue/cache", "[method]vacancy.vacancy-fill")
+    vacancy_fill(self, ttl_ms: u32?) -> OutgoingValue { }
+
+}
+⍝? The `get-or-set` operation asynchronously returns one of two cases
+⍝? enumerated by `get-or-set-entry`: in the `occupied` case, the given key
+⍝? already has a value present in the cache; in the `vacant` case, there
+⍝? was no value and the caller should write a value into the returned
+⍝? `vacancy`. This operation allows multiple concurrent `get-or-set`
+⍝? invocations to rendezvous such that only one invocation receives the
+⍝? `vacant` result while all other invocations wait until the vacancy is
+⍝? filled before receiving an `occupied` result. Implementations are not
+⍝? required to implement this rendezvous or to rendezvous in all possible
+⍝? cases.
+unite GetOrSetEntry {
+    #export("occupied")
+    Occupied {
+        value: IncomingValue
+    },
+    #export("vacant")
+    Vacant {
+        value: Vacancy
+    },
+}
+
+⍝? The `get` operation returns the value passed by a previous `set` for the
+⍝? same key within the given TTL or none if there is no such value.
+#import("wasi:keyvalue/cache", "get")
+micro get(k: utf8) -> FutureGetResult { }
+
+⍝? The `exists` operation returns whether a value was previously `set` for
+⍝? the given key within the TTL.
+#import("wasi:keyvalue/cache", "exists")
+micro exists(k: utf8) -> FutureExistsResult { }
+
+⍝? The `set` operation sets the given value for the given key for the given
+⍝? time-to-live (TTL) duration, if supplied, specified in milliseconds. If
+⍝? a TTL is not supplied, the key may be kept indefinitely (as-if a very
+⍝? large TTL were used). If the key is already present in the cache, the
+⍝? value is updated in-place. In the common case of computing and caching a
+⍝? value if the given key is not already in the cache, consider using
+⍝? `get-or-set` (below) intead of separate `get` and `set` operations.
+#import("wasi:keyvalue/cache", "set")
+micro set(k: utf8, v: &OutgoingValue, ttl_ms: u32?) -> FutureResult { }
+
+#import("wasi:keyvalue/cache", "get-or-set")
+micro get_or_set(k: utf8) -> FutureGetOrSetResult { }
+
+⍝? The `delete` operation removes any value with the given key from the
+⍝? cache. Like all cache operations, `delete` is weakly ordered and thus
+⍝? concurrent `get` calls may still see deleted keys for a period of time.
+⍝? Additionally, due to weak ordering, concurrent `set` calls for the same
+⍝? key may or may not get deleted.
+#import("wasi:keyvalue/cache", "delete")
+micro delete(k: utf8) -> FutureResult { }
+
+alias typus Bucket: Bucket { }
+
+alias typus Error: Error { }
+
+alias typus Key: utf8 { }
+
+alias typus IncomingValue: IncomingValue { }
+
+alias typus OutgoingValue: OutgoingValue { }
+
+⍝? Get the values associated with the keys in the bucket. It returns a list of
+⍝? incoming-value that can be consumed to get the value associated with the key.
+⍝? 
+⍝? If any of the keys do not exist in the bucket, it returns a `none` value for
+⍝? that key in the list.
+⍝? 
+⍝? Note that the key-value pairs are guaranteed to be returned in the same order
+⍝? 
+⍝? MAY show an out-of-date value if there are concurrent writes to the bucket.
+⍝? 
+⍝? If any other error occurs, it returns an `Err(error)`.
+#import("wasi:keyvalue/eventual-batch", "get-many")
+micro get_many(bucket: &Bucket, keys: Array<utf8>) -> Result<Array<IncomingValue?>, Error> { }
+
+⍝? Get all the keys in the bucket. It returns a list of keys.
+⍝? 
+⍝? Note that the keys are not guaranteed to be returned in any particular order.
+⍝? 
+⍝? If the bucket is empty, it returns an empty list.
+⍝? 
+⍝? MAY show an out-of-date list of keys if there are concurrent writes to the bucket.
+⍝? 
+⍝? If any error occurs, it returns an `Err(error)`.
+#import("wasi:keyvalue/eventual-batch", "keys")
+micro keys(bucket: &Bucket) -> Result<Array<utf8>, Error> { }
+
+⍝? Set the values associated with the keys in the bucket. If the key already
+⍝? exists in the bucket, it overwrites the value.
+⍝? 
+⍝? Note that the key-value pairs are not guaranteed to be set in the order
+⍝? they are provided.
+⍝? 
+⍝? If any of the keys do not exist in the bucket, it creates a new key-value pair.
+⍝? 
+⍝? If any other error occurs, it returns an `Err(error)`. When an error occurs, it
+⍝? does not rollback the key-value pairs that were already set. Thus, this batch operation
+⍝? does not guarantee atomicity, implying that some key-value pairs could be
+⍝? set while others might fail.
+⍝? 
+⍝? Other concurrent operations may also be able to see the partial results.
+#import("wasi:keyvalue/eventual-batch", "set-many")
+micro set_many(bucket: &Bucket, key_values: Array<(utf8, &OutgoingValue)>) -> Result<(), Error> { }
+
+⍝? Delete the key-value pairs associated with the keys in the bucket.
+⍝? 
+⍝? Note that the key-value pairs are not guaranteed to be deleted in the order
+⍝? they are provided.
+⍝? 
+⍝? If any of the keys do not exist in the bucket, it skips the key.
+⍝? 
+⍝? If any other error occurs, it returns an `Err(error)`. When an error occurs, it
+⍝? does not rollback the key-value pairs that were already deleted. Thus, this batch operation
+⍝? does not guarantee atomicity, implying that some key-value pairs could be
+⍝? deleted while others might fail.
+⍝? 
+⍝? Other concurrent operations may also be able to see the partial results.
+#import("wasi:keyvalue/eventual-batch", "delete-many")
+micro delete_many(bucket: &Bucket, keys: Array<utf8>) -> Result<(), Error> { }
+
+alias typus Bucket: Bucket { }
+
+alias typus Error: Error { }
+
+alias typus IncomingValue: IncomingValue { }
+
+alias typus Key: utf8 { }
+
+alias typus OutgoingValue: OutgoingValue { }
+
+⍝? Get the value associated with the key in the bucket.
+⍝? 
+⍝? The value is returned as an option. If the key-value pair exists in the
+⍝? bucket, it returns `Ok(value)`. If the key does not exist in the
+⍝? bucket, it returns `Ok(none)`.
+⍝? 
+⍝? If any other error occurs, it returns an `Err(error)`.
+#import("wasi:keyvalue/eventual", "get")
+micro get(bucket: &Bucket, key: utf8) -> Result<IncomingValue?, Error> { }
+
+⍝? Set the value associated with the key in the bucket. If the key already
+⍝? exists in the bucket, it overwrites the value.
+⍝? 
+⍝? If the key does not exist in the bucket, it creates a new key-value pair.
+⍝? 
+⍝? If any other error occurs, it returns an `Err(error)`.
+#import("wasi:keyvalue/eventual", "set")
+micro set(bucket: &Bucket, key: utf8, outgoing_value: &OutgoingValue) -> Result<(), Error> { }
+
+⍝? Delete the key-value pair associated with the key in the bucket.
+⍝? 
+⍝? If the key does not exist in the bucket, it does nothing.
+⍝? 
+⍝? If any other error occurs, it returns an `Err(error)`.
+#import("wasi:keyvalue/eventual", "delete")
+micro delete(bucket: &Bucket, key: utf8) -> Result<(), Error> { }
+
+⍝? Check if the key exists in the bucket.
+⍝? 
+⍝? If the key exists in the bucket, it returns `Ok(true)`. If the key does
+⍝? not exist in the bucket, it returns `Ok(false)`.
+⍝? 
+⍝? If any other error occurs, it returns an `Err(error)`.
+#import("wasi:keyvalue/eventual", "exists")
+micro exists(bucket: &Bucket, key: utf8) -> Result<bool, Error> { }
+
+alias typus Bucket: Bucket { }
+
+alias typus Key: utf8 { }
+
+alias typus IncomingValue: IncomingValue { }
+
+⍝? Handle the `set` event for the given bucket and key.
+⍝? It returns a `incoming-value` that represents the new value being set.
+⍝? The new value can be consumed by the handler.
+#import("wasi:keyvalue/handle-watch", "on-set")
+micro on_set(bucket: Bucket, key: utf8, incoming_value: &IncomingValue) -> () { }
+
+⍝? Handle the `delete` event for the given bucket and key.
+⍝? It returns a `key` that represents the key being deleted.
+#import("wasi:keyvalue/handle-watch", "on-delete")
+micro on_delete(bucket: Bucket, key: utf8) -> () { }
+

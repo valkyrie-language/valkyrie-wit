@@ -1,0 +1,1090 @@
+alias typus Duration: u64 { }
+
+alias typus InputStream: InputStream { }
+
+alias typus OutputStream: OutputStream { }
+
+alias typus IoError: Error { }
+
+alias typus Pollable: Pollable { }
+
+⍝? This type corresponds to HTTP standard Methods.
+unite Method {
+    #export("get")
+    Get,
+    #export("head")
+    Head,
+    #export("post")
+    Post,
+    #export("put")
+    Put,
+    #export("delete")
+    Delete,
+    #export("connect")
+    Connect,
+    #export("options")
+    Options,
+    #export("trace")
+    Trace,
+    #export("patch")
+    Patch,
+    #export("other")
+    Other {
+        value: utf8
+    },
+}
+
+⍝? This type corresponds to HTTP standard Related Schemes.
+unite Scheme {
+    #export("HTTP")
+    Http,
+    #export("HTTPS")
+    Https,
+    #export("other")
+    Other {
+        value: utf8
+    },
+}
+
+⍝? Defines the case payload type for `DNS-error` above:
+class DnsErrorPayload {
+    rcode: utf8?,
+    info_code: u16?,
+}
+
+⍝? Defines the case payload type for `TLS-alert-received` above:
+class TlsAlertReceivedPayload {
+    alert_id: u8?,
+    alert_message: utf8?,
+}
+
+⍝? Defines the case payload type for `HTTP-response-{header,trailer}-size` above:
+class FieldSizePayload {
+    field_name: utf8?,
+    field_size: u32?,
+}
+
+⍝? These cases are inspired by the IANA HTTP Proxy Error Types:
+⍝? https://www.iana.org/assignments/http-proxy-status/http-proxy-status.xhtml#table-http-proxy-error-types
+unite ErrorCode {
+    #export("DNS-timeout")
+    DnsTimeout,
+    #export("DNS-error")
+    DnsError {
+        value: DnsErrorPayload
+    },
+    #export("destination-not-found")
+    DestinationNotFound,
+    #export("destination-unavailable")
+    DestinationUnavailable,
+    #export("destination-IP-prohibited")
+    DestinationIpProhibited,
+    #export("destination-IP-unroutable")
+    DestinationIpUnroutable,
+    #export("connection-refused")
+    ConnectionRefused,
+    #export("connection-terminated")
+    ConnectionTerminated,
+    #export("connection-timeout")
+    ConnectionTimeout,
+    #export("connection-read-timeout")
+    ConnectionReadTimeout,
+    #export("connection-write-timeout")
+    ConnectionWriteTimeout,
+    #export("connection-limit-reached")
+    ConnectionLimitReached,
+    #export("TLS-protocol-error")
+    TlsProtocolError,
+    #export("TLS-certificate-error")
+    TlsCertificateError,
+    #export("TLS-alert-received")
+    TlsAlertReceived {
+        value: TlsAlertReceivedPayload
+    },
+    #export("HTTP-request-denied")
+    HttpRequestDenied,
+    #export("HTTP-request-length-required")
+    HttpRequestLengthRequired,
+    #export("HTTP-request-body-size")
+    HttpRequestBodySize {
+        value: u64?
+    },
+    #export("HTTP-request-method-invalid")
+    HttpRequestMethodInvalid,
+    #export("HTTP-request-URI-invalid")
+    HttpRequestUriInvalid,
+    #export("HTTP-request-URI-too-long")
+    HttpRequestUriTooLong,
+    #export("HTTP-request-header-section-size")
+    HttpRequestHeaderSectionSize {
+        value: u32?
+    },
+    #export("HTTP-request-header-size")
+    HttpRequestHeaderSize {
+        value: FieldSizePayload?
+    },
+    #export("HTTP-request-trailer-section-size")
+    HttpRequestTrailerSectionSize {
+        value: u32?
+    },
+    #export("HTTP-request-trailer-size")
+    HttpRequestTrailerSize {
+        value: FieldSizePayload
+    },
+    #export("HTTP-response-incomplete")
+    HttpResponseIncomplete,
+    #export("HTTP-response-header-section-size")
+    HttpResponseHeaderSectionSize {
+        value: u32?
+    },
+    #export("HTTP-response-header-size")
+    HttpResponseHeaderSize {
+        value: FieldSizePayload
+    },
+    #export("HTTP-response-body-size")
+    HttpResponseBodySize {
+        value: u64?
+    },
+    #export("HTTP-response-trailer-section-size")
+    HttpResponseTrailerSectionSize {
+        value: u32?
+    },
+    #export("HTTP-response-trailer-size")
+    HttpResponseTrailerSize {
+        value: FieldSizePayload
+    },
+    #export("HTTP-response-transfer-coding")
+    HttpResponseTransferCoding {
+        value: utf8?
+    },
+    #export("HTTP-response-content-coding")
+    HttpResponseContentCoding {
+        value: utf8?
+    },
+    #export("HTTP-response-timeout")
+    HttpResponseTimeout,
+    #export("HTTP-upgrade-failed")
+    HttpUpgradeFailed,
+    #export("HTTP-protocol-error")
+    HttpProtocolError,
+    #export("loop-detected")
+    LoopDetected,
+    #export("configuration-error")
+    ConfigurationError,
+    ⍝? This is a catch-all error for anything that doesn't fit cleanly into a
+    ⍝? more specific case. It also includes an optional string for an
+    ⍝? unstructured description of the error. Users should not depend on the
+    ⍝? string for diagnosing errors, as it's not required to be consistent
+    ⍝? between implementations.
+    #export("internal-error")
+    InternalError {
+        value: utf8?
+    },
+}
+
+⍝? This type enumerates the different kinds of errors that may occur when
+⍝? setting or appending to a `fields` resource.
+unite HeaderError {
+    ⍝? This error indicates that a `field-key` or `field-value` was
+    ⍝? syntactically invalid when used with an operation that sets headers in a
+    ⍝? `fields`.
+    #export("invalid-syntax")
+    InvalidSyntax,
+    ⍝? This error indicates that a forbidden `field-key` was used when trying
+    ⍝? to set a header in a `fields`.
+    #export("forbidden")
+    Forbidden,
+    ⍝? This error indicates that the operation on the `fields` was not
+    ⍝? permitted because the fields are immutable.
+    #export("immutable")
+    Immutable,
+}
+
+⍝? Field keys are always strings.
+alias typus FieldKey: utf8 { }
+
+⍝? Field values should always be ASCII strings. However, in
+⍝? reality, HTTP implementations often have to interpret malformed values,
+⍝? so they are provided as a list of bytes.
+alias typus FieldValue: Array<u8> { }
+
+⍝? This following block defines the `fields` resource which corresponds to
+⍝? HTTP standard Fields. Fields are a common representation used for both
+⍝? Headers and Trailers.
+⍝? 
+⍝? A `fields` may be mutable or immutable. A `fields` created using the
+⍝? constructor, `from-list`, or `clone` will be mutable, but a `fields`
+⍝? resource given by other means (including, but not limited to,
+⍝? `incoming-request.headers`, `outgoing-request.headers`) might be be
+⍝? immutable. In an immutable fields, the `set`, `append`, and `delete`
+⍝? operations will fail with `header-error.immutable`.
+#import("wasi:http/types", "fields")
+class Fields {
+    ⍝? Construct an empty HTTP Fields.
+    ⍝? 
+    ⍝? The resulting `fields` is mutable.
+    #import("wasi:http/types", "[constructor]fields")
+    fields() -> Fields { }
+
+    ⍝? Construct an HTTP Fields.
+    ⍝? 
+    ⍝? The resulting `fields` is mutable.
+    ⍝? 
+    ⍝? The list represents each key-value pair in the Fields. Keys
+    ⍝? which have multiple values are represented by multiple entries in this
+    ⍝? list with the same key.
+    ⍝? 
+    ⍝? The tuple is a pair of the field key, represented as a string, and
+    ⍝? Value, represented as a list of bytes.
+    ⍝? 
+    ⍝? An error result will be returned if any `field-key` or `field-value` is
+    ⍝? syntactically invalid, or if a field is forbidden.
+    #import("wasi:http/types", "[static]fields.from-list")
+    from_list(entries: Array<(utf8, Array<u8>)>) -> Result<Fields, HeaderError> { }
+
+    ⍝? Get all of the values corresponding to a key. If the key is not present
+    ⍝? in this `fields` or is syntactically invalid, an empty list is returned.
+    ⍝? However, if the key is present but empty, this is represented by a list
+    ⍝? with one or more empty field-values present.
+    #import("wasi:http/types", "[method]fields.get")
+    get(self, name: utf8) -> Array<Array<u8>> { }
+
+    ⍝? Returns `true` when the key is present in this `fields`. If the key is
+    ⍝? syntactically invalid, `false` is returned.
+    #import("wasi:http/types", "[method]fields.has")
+    has(self, name: utf8) -> bool { }
+
+    ⍝? Set all of the values for a key. Clears any existing values for that
+    ⍝? key, if they have been set.
+    ⍝? 
+    ⍝? Fails with `header-error.immutable` if the `fields` are immutable.
+    ⍝? 
+    ⍝? Fails with `header-error.invalid-syntax` if the `field-key` or any of
+    ⍝? the `field-value`s are syntactically invalid.
+    #import("wasi:http/types", "[method]fields.set")
+    set(self, name: utf8, value: Array<Array<u8>>) -> Result<(), HeaderError> { }
+
+    ⍝? Delete all values for a key. Does nothing if no values for the key
+    ⍝? exist.
+    ⍝? 
+    ⍝? Fails with `header-error.immutable` if the `fields` are immutable.
+    ⍝? 
+    ⍝? Fails with `header-error.invalid-syntax` if the `field-key` is
+    ⍝? syntactically invalid.
+    #import("wasi:http/types", "[method]fields.delete")
+    delete(self, name: utf8) -> Result<(), HeaderError> { }
+
+    ⍝? Append a value for a key. Does not change or delete any existing
+    ⍝? values for that key.
+    ⍝? 
+    ⍝? Fails with `header-error.immutable` if the `fields` are immutable.
+    ⍝? 
+    ⍝? Fails with `header-error.invalid-syntax` if the `field-key` or
+    ⍝? `field-value` are syntactically invalid.
+    #import("wasi:http/types", "[method]fields.append")
+    append(self, name: utf8, value: Array<u8>) -> Result<(), HeaderError> { }
+
+    ⍝? Retrieve the full set of keys and values in the Fields. Like the
+    ⍝? constructor, the list represents each key-value pair.
+    ⍝? 
+    ⍝? The outer list represents each key-value pair in the Fields. Keys
+    ⍝? which have multiple values are represented by multiple entries in this
+    ⍝? list with the same key.
+    #import("wasi:http/types", "[method]fields.entries")
+    entries(self) -> Array<(utf8, Array<u8>)> { }
+
+    ⍝? Make a deep copy of the Fields. Equivelant in behavior to calling the
+    ⍝? `fields` constructor on the return value of `entries`. The resulting
+    ⍝? `fields` is mutable.
+    #import("wasi:http/types", "[method]fields.clone")
+    clone(self) -> Fields { }
+
+    ⍝? Construct a new `outgoing-request` with a default `method` of `GET`, and
+    ⍝? `none` values for `path-with-query`, `scheme`, and `authority`.
+    ⍝? 
+    ⍝? * `headers` is the HTTP Headers for the Request.
+    ⍝? 
+    ⍝? It is possible to construct, or manipulate with the accessor functions
+    ⍝? below, an `outgoing-request` with an invalid combination of `scheme`
+    ⍝? and `authority`, or `headers` which are not permitted to be sent.
+    ⍝? It is the obligation of the `outgoing-handler.handle` implementation
+    ⍝? to reject invalid constructions of `outgoing-request`.
+    #import("wasi:http/types", "[constructor]outgoing-request")
+    outgoing_request(headers: Fields) -> OutgoingRequest { }
+
+    ⍝? Construct a default `request-options` value.
+    #import("wasi:http/types", "[constructor]request-options")
+    request_options() -> RequestOptions { }
+
+    ⍝? Construct an `outgoing-response`, with a default `status-code` of `200`.
+    ⍝? If a different `status-code` is needed, it must be set via the
+    ⍝? `set-status-code` method.
+    ⍝? 
+    ⍝? * `headers` is the HTTP Headers for the Response.
+    #import("wasi:http/types", "[constructor]outgoing-response")
+    outgoing_response(headers: Fields) -> OutgoingResponse { }
+
+}
+⍝? Headers is an alias for Fields.
+alias typus Headers: Fields { }
+
+⍝? Trailers is an alias for Fields.
+alias typus Trailers: Fields { }
+
+⍝? Represents an incoming HTTP Request.
+#import("wasi:http/types", "incoming-request")
+class IncomingRequest {
+    ⍝? Construct an empty HTTP Fields.
+    ⍝? 
+    ⍝? The resulting `fields` is mutable.
+    #import("wasi:http/types", "[constructor]fields")
+    fields() -> Fields { }
+
+    ⍝? Returns the method of the incoming request.
+    #import("wasi:http/types", "[method]incoming-request.method")
+    method(self) -> Method { }
+
+    ⍝? Returns the path with query parameters from the request, as a string.
+    #import("wasi:http/types", "[method]incoming-request.path-with-query")
+    path_with_query(self) -> utf8? { }
+
+    ⍝? Returns the protocol scheme from the request.
+    #import("wasi:http/types", "[method]incoming-request.scheme")
+    scheme(self) -> Scheme? { }
+
+    ⍝? Returns the authority from the request, if it was present.
+    #import("wasi:http/types", "[method]incoming-request.authority")
+    authority(self) -> utf8? { }
+
+    ⍝? Get the `headers` associated with the request.
+    ⍝? 
+    ⍝? The returned `headers` resource is immutable: `set`, `append`, and
+    ⍝? `delete` operations will fail with `header-error.immutable`.
+    ⍝? 
+    ⍝? The `headers` returned are a child resource: it must be dropped before
+    ⍝? the parent `incoming-request` is dropped. Dropping this
+    ⍝? `incoming-request` before all children are dropped will trap.
+    #import("wasi:http/types", "[method]incoming-request.headers")
+    headers(self) -> Fields { }
+
+    ⍝? Gives the `incoming-body` associated with this request. Will only
+    ⍝? return success at most once, and subsequent calls will return error.
+    #import("wasi:http/types", "[method]incoming-request.consume")
+    consume(self) -> Result<IncomingBody, ()> { }
+
+    ⍝? Construct a new `outgoing-request` with a default `method` of `GET`, and
+    ⍝? `none` values for `path-with-query`, `scheme`, and `authority`.
+    ⍝? 
+    ⍝? * `headers` is the HTTP Headers for the Request.
+    ⍝? 
+    ⍝? It is possible to construct, or manipulate with the accessor functions
+    ⍝? below, an `outgoing-request` with an invalid combination of `scheme`
+    ⍝? and `authority`, or `headers` which are not permitted to be sent.
+    ⍝? It is the obligation of the `outgoing-handler.handle` implementation
+    ⍝? to reject invalid constructions of `outgoing-request`.
+    #import("wasi:http/types", "[constructor]outgoing-request")
+    outgoing_request(headers: Fields) -> OutgoingRequest { }
+
+    ⍝? Construct a default `request-options` value.
+    #import("wasi:http/types", "[constructor]request-options")
+    request_options() -> RequestOptions { }
+
+    ⍝? Construct an `outgoing-response`, with a default `status-code` of `200`.
+    ⍝? If a different `status-code` is needed, it must be set via the
+    ⍝? `set-status-code` method.
+    ⍝? 
+    ⍝? * `headers` is the HTTP Headers for the Response.
+    #import("wasi:http/types", "[constructor]outgoing-response")
+    outgoing_response(headers: Fields) -> OutgoingResponse { }
+
+}
+⍝? Represents an outgoing HTTP Request.
+#import("wasi:http/types", "outgoing-request")
+class OutgoingRequest {
+    ⍝? Construct an empty HTTP Fields.
+    ⍝? 
+    ⍝? The resulting `fields` is mutable.
+    #import("wasi:http/types", "[constructor]fields")
+    fields() -> Fields { }
+
+    ⍝? Construct a new `outgoing-request` with a default `method` of `GET`, and
+    ⍝? `none` values for `path-with-query`, `scheme`, and `authority`.
+    ⍝? 
+    ⍝? * `headers` is the HTTP Headers for the Request.
+    ⍝? 
+    ⍝? It is possible to construct, or manipulate with the accessor functions
+    ⍝? below, an `outgoing-request` with an invalid combination of `scheme`
+    ⍝? and `authority`, or `headers` which are not permitted to be sent.
+    ⍝? It is the obligation of the `outgoing-handler.handle` implementation
+    ⍝? to reject invalid constructions of `outgoing-request`.
+    #import("wasi:http/types", "[constructor]outgoing-request")
+    outgoing_request(headers: Fields) -> OutgoingRequest { }
+
+    ⍝? Returns the resource corresponding to the outgoing Body for this
+    ⍝? Request.
+    ⍝? 
+    ⍝? Returns success on the first call: the `outgoing-body` resource for
+    ⍝? this `outgoing-request` can be retrieved at most once. Subsequent
+    ⍝? calls will return error.
+    #import("wasi:http/types", "[method]outgoing-request.body")
+    body(self) -> Result<OutgoingBody, ()> { }
+
+    ⍝? Get the Method for the Request.
+    #import("wasi:http/types", "[method]outgoing-request.method")
+    method(self) -> Method { }
+
+    ⍝? Set the Method for the Request. Fails if the string present in a
+    ⍝? `method.other` argument is not a syntactically valid method.
+    #import("wasi:http/types", "[method]outgoing-request.set-method")
+    set_method(self, method: Method) -> Result<(), ()> { }
+
+    ⍝? Get the combination of the HTTP Path and Query for the Request.
+    ⍝? When `none`, this represents an empty Path and empty Query.
+    #import("wasi:http/types", "[method]outgoing-request.path-with-query")
+    path_with_query(self) -> utf8? { }
+
+    ⍝? Set the combination of the HTTP Path and Query for the Request.
+    ⍝? When `none`, this represents an empty Path and empty Query. Fails is the
+    ⍝? string given is not a syntactically valid path and query uri component.
+    #import("wasi:http/types", "[method]outgoing-request.set-path-with-query")
+    set_path_with_query(self, path_with_query: utf8?) -> Result<(), ()> { }
+
+    ⍝? Get the HTTP Related Scheme for the Request. When `none`, the
+    ⍝? implementation may choose an appropriate default scheme.
+    #import("wasi:http/types", "[method]outgoing-request.scheme")
+    scheme(self) -> Scheme? { }
+
+    ⍝? Set the HTTP Related Scheme for the Request. When `none`, the
+    ⍝? implementation may choose an appropriate default scheme. Fails if the
+    ⍝? string given is not a syntactically valid uri scheme.
+    #import("wasi:http/types", "[method]outgoing-request.set-scheme")
+    set_scheme(self, scheme: Scheme?) -> Result<(), ()> { }
+
+    ⍝? Get the HTTP Authority for the Request. A value of `none` may be used
+    ⍝? with Related Schemes which do not require an Authority. The HTTP and
+    ⍝? HTTPS schemes always require an authority.
+    #import("wasi:http/types", "[method]outgoing-request.authority")
+    authority(self) -> utf8? { }
+
+    ⍝? Set the HTTP Authority for the Request. A value of `none` may be used
+    ⍝? with Related Schemes which do not require an Authority. The HTTP and
+    ⍝? HTTPS schemes always require an authority. Fails if the string given is
+    ⍝? not a syntactically valid uri authority.
+    #import("wasi:http/types", "[method]outgoing-request.set-authority")
+    set_authority(self, authority: utf8?) -> Result<(), ()> { }
+
+    ⍝? Get the headers associated with the Request.
+    ⍝? 
+    ⍝? The returned `headers` resource is immutable: `set`, `append`, and
+    ⍝? `delete` operations will fail with `header-error.immutable`.
+    ⍝? 
+    ⍝? This headers resource is a child: it must be dropped before the parent
+    ⍝? `outgoing-request` is dropped, or its ownership is transfered to
+    ⍝? another component by e.g. `outgoing-handler.handle`.
+    #import("wasi:http/types", "[method]outgoing-request.headers")
+    headers(self) -> Fields { }
+
+    ⍝? Construct a default `request-options` value.
+    #import("wasi:http/types", "[constructor]request-options")
+    request_options() -> RequestOptions { }
+
+    ⍝? Construct an `outgoing-response`, with a default `status-code` of `200`.
+    ⍝? If a different `status-code` is needed, it must be set via the
+    ⍝? `set-status-code` method.
+    ⍝? 
+    ⍝? * `headers` is the HTTP Headers for the Response.
+    #import("wasi:http/types", "[constructor]outgoing-response")
+    outgoing_response(headers: Fields) -> OutgoingResponse { }
+
+}
+⍝? Parameters for making an HTTP Request. Each of these parameters is
+⍝? currently an optional timeout applicable to the transport layer of the
+⍝? HTTP protocol.
+⍝? 
+⍝? These timeouts are separate from any the user may use to bound a
+⍝? blocking call to `wasi:io/poll.poll`.
+#import("wasi:http/types", "request-options")
+class RequestOptions {
+    ⍝? Construct an empty HTTP Fields.
+    ⍝? 
+    ⍝? The resulting `fields` is mutable.
+    #import("wasi:http/types", "[constructor]fields")
+    fields() -> Fields { }
+
+    ⍝? Construct a new `outgoing-request` with a default `method` of `GET`, and
+    ⍝? `none` values for `path-with-query`, `scheme`, and `authority`.
+    ⍝? 
+    ⍝? * `headers` is the HTTP Headers for the Request.
+    ⍝? 
+    ⍝? It is possible to construct, or manipulate with the accessor functions
+    ⍝? below, an `outgoing-request` with an invalid combination of `scheme`
+    ⍝? and `authority`, or `headers` which are not permitted to be sent.
+    ⍝? It is the obligation of the `outgoing-handler.handle` implementation
+    ⍝? to reject invalid constructions of `outgoing-request`.
+    #import("wasi:http/types", "[constructor]outgoing-request")
+    outgoing_request(headers: Fields) -> OutgoingRequest { }
+
+    ⍝? Construct a default `request-options` value.
+    #import("wasi:http/types", "[constructor]request-options")
+    request_options() -> RequestOptions { }
+
+    ⍝? The timeout for the initial connect to the HTTP Server.
+    #import("wasi:http/types", "[method]request-options.connect-timeout")
+    connect_timeout(self) -> u64? { }
+
+    ⍝? Set the timeout for the initial connect to the HTTP Server. An error
+    ⍝? return value indicates that this timeout is not supported.
+    #import("wasi:http/types", "[method]request-options.set-connect-timeout")
+    set_connect_timeout(self, duration: u64?) -> Result<(), ()> { }
+
+    ⍝? The timeout for receiving the first byte of the Response body.
+    #import("wasi:http/types", "[method]request-options.first-byte-timeout")
+    first_byte_timeout(self) -> u64? { }
+
+    ⍝? Set the timeout for receiving the first byte of the Response body. An
+    ⍝? error return value indicates that this timeout is not supported.
+    #import("wasi:http/types", "[method]request-options.set-first-byte-timeout")
+    set_first_byte_timeout(self, duration: u64?) -> Result<(), ()> { }
+
+    ⍝? The timeout for receiving subsequent chunks of bytes in the Response
+    ⍝? body stream.
+    #import("wasi:http/types", "[method]request-options.between-bytes-timeout")
+    between_bytes_timeout(self) -> u64? { }
+
+    ⍝? Set the timeout for receiving subsequent chunks of bytes in the Response
+    ⍝? body stream. An error return value indicates that this timeout is not
+    ⍝? supported.
+    #import("wasi:http/types", "[method]request-options.set-between-bytes-timeout")
+    set_between_bytes_timeout(self, duration: u64?) -> Result<(), ()> { }
+
+    ⍝? Construct an `outgoing-response`, with a default `status-code` of `200`.
+    ⍝? If a different `status-code` is needed, it must be set via the
+    ⍝? `set-status-code` method.
+    ⍝? 
+    ⍝? * `headers` is the HTTP Headers for the Response.
+    #import("wasi:http/types", "[constructor]outgoing-response")
+    outgoing_response(headers: Fields) -> OutgoingResponse { }
+
+}
+⍝? Represents the ability to send an HTTP Response.
+⍝? 
+⍝? This resource is used by the `wasi:http/incoming-handler` interface to
+⍝? allow a Response to be sent corresponding to the Request provided as the
+⍝? other argument to `incoming-handler.handle`.
+#import("wasi:http/types", "response-outparam")
+class ResponseOutparam {
+    ⍝? Construct an empty HTTP Fields.
+    ⍝? 
+    ⍝? The resulting `fields` is mutable.
+    #import("wasi:http/types", "[constructor]fields")
+    fields() -> Fields { }
+
+    ⍝? Construct a new `outgoing-request` with a default `method` of `GET`, and
+    ⍝? `none` values for `path-with-query`, `scheme`, and `authority`.
+    ⍝? 
+    ⍝? * `headers` is the HTTP Headers for the Request.
+    ⍝? 
+    ⍝? It is possible to construct, or manipulate with the accessor functions
+    ⍝? below, an `outgoing-request` with an invalid combination of `scheme`
+    ⍝? and `authority`, or `headers` which are not permitted to be sent.
+    ⍝? It is the obligation of the `outgoing-handler.handle` implementation
+    ⍝? to reject invalid constructions of `outgoing-request`.
+    #import("wasi:http/types", "[constructor]outgoing-request")
+    outgoing_request(headers: Fields) -> OutgoingRequest { }
+
+    ⍝? Construct a default `request-options` value.
+    #import("wasi:http/types", "[constructor]request-options")
+    request_options() -> RequestOptions { }
+
+    ⍝? Set the value of the `response-outparam` to either send a response,
+    ⍝? or indicate an error.
+    ⍝? 
+    ⍝? This method consumes the `response-outparam` to ensure that it is
+    ⍝? called at most once. If it is never called, the implementation
+    ⍝? will respond with an error.
+    ⍝? 
+    ⍝? The user may provide an `error` to `response` to allow the
+    ⍝? implementation determine how to respond with an HTTP error response.
+    #import("wasi:http/types", "[static]response-outparam.set")
+    set(param: ResponseOutparam, response: Result<OutgoingResponse, ErrorCode>) -> () { }
+
+    ⍝? Construct an `outgoing-response`, with a default `status-code` of `200`.
+    ⍝? If a different `status-code` is needed, it must be set via the
+    ⍝? `set-status-code` method.
+    ⍝? 
+    ⍝? * `headers` is the HTTP Headers for the Response.
+    #import("wasi:http/types", "[constructor]outgoing-response")
+    outgoing_response(headers: Fields) -> OutgoingResponse { }
+
+}
+⍝? This type corresponds to the HTTP standard Status Code.
+alias typus StatusCode: u16 { }
+
+⍝? Represents an incoming HTTP Response.
+#import("wasi:http/types", "incoming-response")
+class IncomingResponse {
+    ⍝? Construct an empty HTTP Fields.
+    ⍝? 
+    ⍝? The resulting `fields` is mutable.
+    #import("wasi:http/types", "[constructor]fields")
+    fields() -> Fields { }
+
+    ⍝? Construct a new `outgoing-request` with a default `method` of `GET`, and
+    ⍝? `none` values for `path-with-query`, `scheme`, and `authority`.
+    ⍝? 
+    ⍝? * `headers` is the HTTP Headers for the Request.
+    ⍝? 
+    ⍝? It is possible to construct, or manipulate with the accessor functions
+    ⍝? below, an `outgoing-request` with an invalid combination of `scheme`
+    ⍝? and `authority`, or `headers` which are not permitted to be sent.
+    ⍝? It is the obligation of the `outgoing-handler.handle` implementation
+    ⍝? to reject invalid constructions of `outgoing-request`.
+    #import("wasi:http/types", "[constructor]outgoing-request")
+    outgoing_request(headers: Fields) -> OutgoingRequest { }
+
+    ⍝? Construct a default `request-options` value.
+    #import("wasi:http/types", "[constructor]request-options")
+    request_options() -> RequestOptions { }
+
+    ⍝? Returns the status code from the incoming response.
+    #import("wasi:http/types", "[method]incoming-response.status")
+    status(self) -> u16 { }
+
+    ⍝? Returns the headers from the incoming response.
+    ⍝? 
+    ⍝? The returned `headers` resource is immutable: `set`, `append`, and
+    ⍝? `delete` operations will fail with `header-error.immutable`.
+    ⍝? 
+    ⍝? This headers resource is a child: it must be dropped before the parent
+    ⍝? `incoming-response` is dropped.
+    #import("wasi:http/types", "[method]incoming-response.headers")
+    headers(self) -> Fields { }
+
+    ⍝? Returns the incoming body. May be called at most once. Returns error
+    ⍝? if called additional times.
+    #import("wasi:http/types", "[method]incoming-response.consume")
+    consume(self) -> Result<IncomingBody, ()> { }
+
+    ⍝? Construct an `outgoing-response`, with a default `status-code` of `200`.
+    ⍝? If a different `status-code` is needed, it must be set via the
+    ⍝? `set-status-code` method.
+    ⍝? 
+    ⍝? * `headers` is the HTTP Headers for the Response.
+    #import("wasi:http/types", "[constructor]outgoing-response")
+    outgoing_response(headers: Fields) -> OutgoingResponse { }
+
+}
+⍝? Represents an incoming HTTP Request or Response's Body.
+⍝? 
+⍝? A body has both its contents - a stream of bytes - and a (possibly
+⍝? empty) set of trailers, indicating that the full contents of the
+⍝? body have been received. This resource represents the contents as
+⍝? an `input-stream` and the delivery of trailers as a `future-trailers`,
+⍝? and ensures that the user of this interface may only be consuming either
+⍝? the body contents or waiting on trailers at any given time.
+#import("wasi:http/types", "incoming-body")
+class IncomingBody {
+    ⍝? Construct an empty HTTP Fields.
+    ⍝? 
+    ⍝? The resulting `fields` is mutable.
+    #import("wasi:http/types", "[constructor]fields")
+    fields() -> Fields { }
+
+    ⍝? Construct a new `outgoing-request` with a default `method` of `GET`, and
+    ⍝? `none` values for `path-with-query`, `scheme`, and `authority`.
+    ⍝? 
+    ⍝? * `headers` is the HTTP Headers for the Request.
+    ⍝? 
+    ⍝? It is possible to construct, or manipulate with the accessor functions
+    ⍝? below, an `outgoing-request` with an invalid combination of `scheme`
+    ⍝? and `authority`, or `headers` which are not permitted to be sent.
+    ⍝? It is the obligation of the `outgoing-handler.handle` implementation
+    ⍝? to reject invalid constructions of `outgoing-request`.
+    #import("wasi:http/types", "[constructor]outgoing-request")
+    outgoing_request(headers: Fields) -> OutgoingRequest { }
+
+    ⍝? Construct a default `request-options` value.
+    #import("wasi:http/types", "[constructor]request-options")
+    request_options() -> RequestOptions { }
+
+    ⍝? Returns the contents of the body, as a stream of bytes.
+    ⍝? 
+    ⍝? Returns success on first call: the stream representing the contents
+    ⍝? can be retrieved at most once. Subsequent calls will return error.
+    ⍝? 
+    ⍝? The returned `input-stream` resource is a child: it must be dropped
+    ⍝? before the parent `incoming-body` is dropped, or consumed by
+    ⍝? `incoming-body.finish`.
+    ⍝? 
+    ⍝? This invariant ensures that the implementation can determine whether
+    ⍝? the user is consuming the contents of the body, waiting on the
+    ⍝? `future-trailers` to be ready, or neither. This allows for network
+    ⍝? backpressure is to be applied when the user is consuming the body,
+    ⍝? and for that backpressure to not inhibit delivery of the trailers if
+    ⍝? the user does not read the entire body.
+    #import("wasi:http/types", "[method]incoming-body.stream")
+    stream(self) -> Result<InputStream, ()> { }
+
+    ⍝? Takes ownership of `incoming-body`, and returns a `future-trailers`.
+    ⍝? This function will trap if the `input-stream` child is still alive.
+    #import("wasi:http/types", "[static]incoming-body.finish")
+    finish(this: IncomingBody) -> FutureTrailers { }
+
+    ⍝? Construct an `outgoing-response`, with a default `status-code` of `200`.
+    ⍝? If a different `status-code` is needed, it must be set via the
+    ⍝? `set-status-code` method.
+    ⍝? 
+    ⍝? * `headers` is the HTTP Headers for the Response.
+    #import("wasi:http/types", "[constructor]outgoing-response")
+    outgoing_response(headers: Fields) -> OutgoingResponse { }
+
+}
+⍝? Represents a future which may eventaully return trailers, or an error.
+⍝? 
+⍝? In the case that the incoming HTTP Request or Response did not have any
+⍝? trailers, this future will resolve to the empty set of trailers once the
+⍝? complete Request or Response body has been received.
+#import("wasi:http/types", "future-trailers")
+class FutureTrailers {
+    ⍝? Construct an empty HTTP Fields.
+    ⍝? 
+    ⍝? The resulting `fields` is mutable.
+    #import("wasi:http/types", "[constructor]fields")
+    fields() -> Fields { }
+
+    ⍝? Construct a new `outgoing-request` with a default `method` of `GET`, and
+    ⍝? `none` values for `path-with-query`, `scheme`, and `authority`.
+    ⍝? 
+    ⍝? * `headers` is the HTTP Headers for the Request.
+    ⍝? 
+    ⍝? It is possible to construct, or manipulate with the accessor functions
+    ⍝? below, an `outgoing-request` with an invalid combination of `scheme`
+    ⍝? and `authority`, or `headers` which are not permitted to be sent.
+    ⍝? It is the obligation of the `outgoing-handler.handle` implementation
+    ⍝? to reject invalid constructions of `outgoing-request`.
+    #import("wasi:http/types", "[constructor]outgoing-request")
+    outgoing_request(headers: Fields) -> OutgoingRequest { }
+
+    ⍝? Construct a default `request-options` value.
+    #import("wasi:http/types", "[constructor]request-options")
+    request_options() -> RequestOptions { }
+
+    ⍝? Returns a pollable which becomes ready when either the trailers have
+    ⍝? been received, or an error has occured. When this pollable is ready,
+    ⍝? the `get` method will return `some`.
+    #import("wasi:http/types", "[method]future-trailers.subscribe")
+    subscribe(self) -> Pollable { }
+
+    ⍝? Returns the contents of the trailers, or an error which occured,
+    ⍝? once the future is ready.
+    ⍝? 
+    ⍝? The outer `option` represents future readiness. Users can wait on this
+    ⍝? `option` to become `some` using the `subscribe` method.
+    ⍝? 
+    ⍝? The outer `result` is used to retrieve the trailers or error at most
+    ⍝? once. It will be success on the first call in which the outer option
+    ⍝? is `some`, and error on subsequent calls.
+    ⍝? 
+    ⍝? The inner `result` represents that either the HTTP Request or Response
+    ⍝? body, as well as any trailers, were received successfully, or that an
+    ⍝? error occured receiving them. The optional `trailers` indicates whether
+    ⍝? or not trailers were present in the body.
+    ⍝? 
+    ⍝? When some `trailers` are returned by this method, the `trailers`
+    ⍝? resource is immutable, and a child. Use of the `set`, `append`, or
+    ⍝? `delete` methods will return an error, and the resource must be
+    ⍝? dropped before the parent `future-trailers` is dropped.
+    #import("wasi:http/types", "[method]future-trailers.get")
+    get(self) -> Result<Result<Fields?, ErrorCode>, ()>? { }
+
+    ⍝? Construct an `outgoing-response`, with a default `status-code` of `200`.
+    ⍝? If a different `status-code` is needed, it must be set via the
+    ⍝? `set-status-code` method.
+    ⍝? 
+    ⍝? * `headers` is the HTTP Headers for the Response.
+    #import("wasi:http/types", "[constructor]outgoing-response")
+    outgoing_response(headers: Fields) -> OutgoingResponse { }
+
+}
+⍝? Represents an outgoing HTTP Response.
+#import("wasi:http/types", "outgoing-response")
+class OutgoingResponse {
+    ⍝? Construct an empty HTTP Fields.
+    ⍝? 
+    ⍝? The resulting `fields` is mutable.
+    #import("wasi:http/types", "[constructor]fields")
+    fields() -> Fields { }
+
+    ⍝? Construct a new `outgoing-request` with a default `method` of `GET`, and
+    ⍝? `none` values for `path-with-query`, `scheme`, and `authority`.
+    ⍝? 
+    ⍝? * `headers` is the HTTP Headers for the Request.
+    ⍝? 
+    ⍝? It is possible to construct, or manipulate with the accessor functions
+    ⍝? below, an `outgoing-request` with an invalid combination of `scheme`
+    ⍝? and `authority`, or `headers` which are not permitted to be sent.
+    ⍝? It is the obligation of the `outgoing-handler.handle` implementation
+    ⍝? to reject invalid constructions of `outgoing-request`.
+    #import("wasi:http/types", "[constructor]outgoing-request")
+    outgoing_request(headers: Fields) -> OutgoingRequest { }
+
+    ⍝? Construct a default `request-options` value.
+    #import("wasi:http/types", "[constructor]request-options")
+    request_options() -> RequestOptions { }
+
+    ⍝? Construct an `outgoing-response`, with a default `status-code` of `200`.
+    ⍝? If a different `status-code` is needed, it must be set via the
+    ⍝? `set-status-code` method.
+    ⍝? 
+    ⍝? * `headers` is the HTTP Headers for the Response.
+    #import("wasi:http/types", "[constructor]outgoing-response")
+    outgoing_response(headers: Fields) -> OutgoingResponse { }
+
+    ⍝? Get the HTTP Status Code for the Response.
+    #import("wasi:http/types", "[method]outgoing-response.status-code")
+    status_code(self) -> u16 { }
+
+    ⍝? Set the HTTP Status Code for the Response. Fails if the status-code
+    ⍝? given is not a valid http status code.
+    #import("wasi:http/types", "[method]outgoing-response.set-status-code")
+    set_status_code(self, status_code: u16) -> Result<(), ()> { }
+
+    ⍝? Get the headers associated with the Request.
+    ⍝? 
+    ⍝? The returned `headers` resource is immutable: `set`, `append`, and
+    ⍝? `delete` operations will fail with `header-error.immutable`.
+    ⍝? 
+    ⍝? This headers resource is a child: it must be dropped before the parent
+    ⍝? `outgoing-request` is dropped, or its ownership is transfered to
+    ⍝? another component by e.g. `outgoing-handler.handle`.
+    #import("wasi:http/types", "[method]outgoing-response.headers")
+    headers(self) -> Fields { }
+
+    ⍝? Returns the resource corresponding to the outgoing Body for this Response.
+    ⍝? 
+    ⍝? Returns success on the first call: the `outgoing-body` resource for
+    ⍝? this `outgoing-response` can be retrieved at most once. Subsequent
+    ⍝? calls will return error.
+    #import("wasi:http/types", "[method]outgoing-response.body")
+    body(self) -> Result<OutgoingBody, ()> { }
+
+}
+⍝? Represents an outgoing HTTP Request or Response's Body.
+⍝? 
+⍝? A body has both its contents - a stream of bytes - and a (possibly
+⍝? empty) set of trailers, inducating the full contents of the body
+⍝? have been sent. This resource represents the contents as an
+⍝? `output-stream` child resource, and the completion of the body (with
+⍝? optional trailers) with a static function that consumes the
+⍝? `outgoing-body` resource, and ensures that the user of this interface
+⍝? may not write to the body contents after the body has been finished.
+⍝? 
+⍝? If the user code drops this resource, as opposed to calling the static
+⍝? method `finish`, the implementation should treat the body as incomplete,
+⍝? and that an error has occured. The implementation should propogate this
+⍝? error to the HTTP protocol by whatever means it has available,
+⍝? including: corrupting the body on the wire, aborting the associated
+⍝? Request, or sending a late status code for the Response.
+#import("wasi:http/types", "outgoing-body")
+class OutgoingBody {
+    ⍝? Construct an empty HTTP Fields.
+    ⍝? 
+    ⍝? The resulting `fields` is mutable.
+    #import("wasi:http/types", "[constructor]fields")
+    fields() -> Fields { }
+
+    ⍝? Construct a new `outgoing-request` with a default `method` of `GET`, and
+    ⍝? `none` values for `path-with-query`, `scheme`, and `authority`.
+    ⍝? 
+    ⍝? * `headers` is the HTTP Headers for the Request.
+    ⍝? 
+    ⍝? It is possible to construct, or manipulate with the accessor functions
+    ⍝? below, an `outgoing-request` with an invalid combination of `scheme`
+    ⍝? and `authority`, or `headers` which are not permitted to be sent.
+    ⍝? It is the obligation of the `outgoing-handler.handle` implementation
+    ⍝? to reject invalid constructions of `outgoing-request`.
+    #import("wasi:http/types", "[constructor]outgoing-request")
+    outgoing_request(headers: Fields) -> OutgoingRequest { }
+
+    ⍝? Construct a default `request-options` value.
+    #import("wasi:http/types", "[constructor]request-options")
+    request_options() -> RequestOptions { }
+
+    ⍝? Construct an `outgoing-response`, with a default `status-code` of `200`.
+    ⍝? If a different `status-code` is needed, it must be set via the
+    ⍝? `set-status-code` method.
+    ⍝? 
+    ⍝? * `headers` is the HTTP Headers for the Response.
+    #import("wasi:http/types", "[constructor]outgoing-response")
+    outgoing_response(headers: Fields) -> OutgoingResponse { }
+
+    ⍝? Returns a stream for writing the body contents.
+    ⍝? 
+    ⍝? The returned `output-stream` is a child resource: it must be dropped
+    ⍝? before the parent `outgoing-body` resource is dropped (or finished),
+    ⍝? otherwise the `outgoing-body` drop or `finish` will trap.
+    ⍝? 
+    ⍝? Returns success on the first call: the `output-stream` resource for
+    ⍝? this `outgoing-body` may be retrieved at most once. Subsequent calls
+    ⍝? will return error.
+    #import("wasi:http/types", "[method]outgoing-body.write")
+    write(self) -> Result<OutputStream, ()> { }
+
+    ⍝? Finalize an outgoing body, optionally providing trailers. This must be
+    ⍝? called to signal that the response is complete. If the `outgoing-body`
+    ⍝? is dropped without calling `outgoing-body.finalize`, the implementation
+    ⍝? should treat the body as corrupted.
+    ⍝? 
+    ⍝? Fails if the body's `outgoing-request` or `outgoing-response` was
+    ⍝? constructed with a Content-Length header, and the contents written
+    ⍝? to the body (via `write`) does not match the value given in the
+    ⍝? Content-Length.
+    #import("wasi:http/types", "[static]outgoing-body.finish")
+    finish(this: OutgoingBody, trailers: Fields?) -> Result<(), ErrorCode> { }
+
+}
+⍝? Represents a future which may eventaully return an incoming HTTP
+⍝? Response, or an error.
+⍝? 
+⍝? This resource is returned by the `wasi:http/outgoing-handler` interface to
+⍝? provide the HTTP Response corresponding to the sent Request.
+#import("wasi:http/types", "future-incoming-response")
+class FutureIncomingResponse {
+    ⍝? Construct an empty HTTP Fields.
+    ⍝? 
+    ⍝? The resulting `fields` is mutable.
+    #import("wasi:http/types", "[constructor]fields")
+    fields() -> Fields { }
+
+    ⍝? Construct a new `outgoing-request` with a default `method` of `GET`, and
+    ⍝? `none` values for `path-with-query`, `scheme`, and `authority`.
+    ⍝? 
+    ⍝? * `headers` is the HTTP Headers for the Request.
+    ⍝? 
+    ⍝? It is possible to construct, or manipulate with the accessor functions
+    ⍝? below, an `outgoing-request` with an invalid combination of `scheme`
+    ⍝? and `authority`, or `headers` which are not permitted to be sent.
+    ⍝? It is the obligation of the `outgoing-handler.handle` implementation
+    ⍝? to reject invalid constructions of `outgoing-request`.
+    #import("wasi:http/types", "[constructor]outgoing-request")
+    outgoing_request(headers: Fields) -> OutgoingRequest { }
+
+    ⍝? Construct a default `request-options` value.
+    #import("wasi:http/types", "[constructor]request-options")
+    request_options() -> RequestOptions { }
+
+    ⍝? Construct an `outgoing-response`, with a default `status-code` of `200`.
+    ⍝? If a different `status-code` is needed, it must be set via the
+    ⍝? `set-status-code` method.
+    ⍝? 
+    ⍝? * `headers` is the HTTP Headers for the Response.
+    #import("wasi:http/types", "[constructor]outgoing-response")
+    outgoing_response(headers: Fields) -> OutgoingResponse { }
+
+    ⍝? Returns a pollable which becomes ready when either the Response has
+    ⍝? been received, or an error has occured. When this pollable is ready,
+    ⍝? the `get` method will return `some`.
+    #import("wasi:http/types", "[method]future-incoming-response.subscribe")
+    subscribe(self) -> Pollable { }
+
+    ⍝? Returns the incoming HTTP Response, or an error, once one is ready.
+    ⍝? 
+    ⍝? The outer `option` represents future readiness. Users can wait on this
+    ⍝? `option` to become `some` using the `subscribe` method.
+    ⍝? 
+    ⍝? The outer `result` is used to retrieve the response or error at most
+    ⍝? once. It will be success on the first call in which the outer option
+    ⍝? is `some`, and error on subsequent calls.
+    ⍝? 
+    ⍝? The inner `result` represents that either the incoming HTTP Response
+    ⍝? status and headers have recieved successfully, or that an error
+    ⍝? occured. Errors may also occur while consuming the response body,
+    ⍝? but those will be reported by the `incoming-body` and its
+    ⍝? `output-stream` child.
+    #import("wasi:http/types", "[method]future-incoming-response.get")
+    get(self) -> Result<Result<IncomingResponse, ErrorCode>, ()>? { }
+
+}
+⍝? Attempts to extract a http-related `error` from the wasi:io `error`
+⍝? provided.
+⍝? 
+⍝? Stream operations which return
+⍝? `wasi:io/stream/stream-error::last-operation-failed` have a payload of
+⍝? type `wasi:io/error/error` with more information about the operation
+⍝? that failed. This payload can be passed through to this function to see
+⍝? if there's http-related information about the error to return.
+⍝? 
+⍝? Note that this function is fallible because not all io-errors are
+⍝? http-related errors.
+#import("wasi:http/types", "http-error-code")
+micro http_error_code(err: &Error) -> ErrorCode? { }
+
+    ⍝? Construct an empty HTTP Fields.
+    ⍝? 
+    ⍝? The resulting `fields` is mutable.
+    #import("wasi:http/types", "[constructor]fields")
+    fields() -> Fields { }
+
+    ⍝? Construct a new `outgoing-request` with a default `method` of `GET`, and
+    ⍝? `none` values for `path-with-query`, `scheme`, and `authority`.
+    ⍝? 
+    ⍝? * `headers` is the HTTP Headers for the Request.
+    ⍝? 
+    ⍝? It is possible to construct, or manipulate with the accessor functions
+    ⍝? below, an `outgoing-request` with an invalid combination of `scheme`
+    ⍝? and `authority`, or `headers` which are not permitted to be sent.
+    ⍝? It is the obligation of the `outgoing-handler.handle` implementation
+    ⍝? to reject invalid constructions of `outgoing-request`.
+    #import("wasi:http/types", "[constructor]outgoing-request")
+    outgoing_request(headers: Fields) -> OutgoingRequest { }
+
+    ⍝? Construct a default `request-options` value.
+    #import("wasi:http/types", "[constructor]request-options")
+    request_options() -> RequestOptions { }
+
+    ⍝? Construct an `outgoing-response`, with a default `status-code` of `200`.
+    ⍝? If a different `status-code` is needed, it must be set via the
+    ⍝? `set-status-code` method.
+    ⍝? 
+    ⍝? * `headers` is the HTTP Headers for the Response.
+    #import("wasi:http/types", "[constructor]outgoing-response")
+    outgoing_response(headers: Fields) -> OutgoingResponse { }
+
+alias typus IncomingRequest: IncomingRequest { }
+
+alias typus ResponseOutparam: ResponseOutparam { }
+
+⍝? This function is invoked with an incoming HTTP Request, and a resource
+⍝? `response-outparam` which provides the capability to reply with an HTTP
+⍝? Response. The response is sent by calling the `response-outparam.set`
+⍝? method, which allows execution to continue after the response has been
+⍝? sent. This enables both streaming to the response body, and performing other
+⍝? work.
+⍝? 
+⍝? The implementor of this function must write a response to the
+⍝? `response-outparam` before returning, or else the caller will respond
+⍝? with an error on its behalf.
+#import("wasi:http/incoming-handler", "handle")
+micro handle(request: IncomingRequest, response_out: ResponseOutparam) -> () { }
+
+alias typus OutgoingRequest: OutgoingRequest { }
+
+alias typus RequestOptions: RequestOptions { }
+
+alias typus FutureIncomingResponse: FutureIncomingResponse { }
+
+alias typus ErrorCode: ErrorCode { }
+
+⍝? This function is invoked with an outgoing HTTP Request, and it returns
+⍝? a resource `future-incoming-response` which represents an HTTP Response
+⍝? which may arrive in the future.
+⍝? 
+⍝? The `options` argument accepts optional parameters for the HTTP
+⍝? protocol's transport layer.
+⍝? 
+⍝? This function may return an error if the `outgoing-request` is invalid
+⍝? or not allowed to be made. Otherwise, protocol errors are reported
+⍝? through the `future-incoming-response`.
+#import("wasi:http/outgoing-handler", "handle")
+micro handle(request: OutgoingRequest, options: RequestOptions?) -> Result<FutureIncomingResponse, ErrorCode> { }
+

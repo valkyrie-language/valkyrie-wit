@@ -1,0 +1,72 @@
+⍝? Get the POSIX-style environment variables.
+⍝? 
+⍝? Each environment variable is provided as a pair of string variable names
+⍝? and string value.
+⍝? 
+⍝? Morally, these are a value import, but until value imports are available
+⍝? in the component model, this import function should return the same
+⍝? values each time it is called.
+#import("wasi:cli/environment", "get-environment")
+micro get_environment() -> Array<(utf8, utf8)> { }
+
+⍝? Get the POSIX-style arguments to the program.
+#import("wasi:cli/environment", "get-arguments")
+micro get_arguments() -> Array<utf8> { }
+
+⍝? Return a path that programs should use as their initial current working
+⍝? directory, interpreting `.` as shorthand for this.
+#import("wasi:cli/environment", "initial-cwd")
+micro initial_cwd() -> utf8? { }
+
+⍝? Exit the current instance and any linked instances.
+#import("wasi:cli/exit", "exit")
+micro exit(status: Result<(), ()>) -> () { }
+
+⍝? Run the program.
+#import("wasi:cli/run", "run")
+micro run() -> Result<(), ()> { }
+
+alias typus InputStream: InputStream { }
+
+#import("wasi:cli/stdin", "get-stdin")
+micro get_stdin() -> InputStream { }
+
+alias typus OutputStream: OutputStream { }
+
+#import("wasi:cli/stdout", "get-stdout")
+micro get_stdout() -> OutputStream { }
+
+alias typus OutputStream: OutputStream { }
+
+#import("wasi:cli/stderr", "get-stderr")
+micro get_stderr() -> OutputStream { }
+
+⍝? The input side of a terminal.
+#import("wasi:cli/terminal-input", "terminal-input")
+class TerminalInput {
+}
+⍝? The output side of a terminal.
+#import("wasi:cli/terminal-output", "terminal-output")
+class TerminalOutput {
+}
+alias typus TerminalInput: TerminalInput { }
+
+⍝? If stdin is connected to a terminal, return a `terminal-input` handle
+⍝? allowing further interaction with it.
+#import("wasi:cli/terminal-stdin", "get-terminal-stdin")
+micro get_terminal_stdin() -> TerminalInput? { }
+
+alias typus TerminalOutput: TerminalOutput { }
+
+⍝? If stdout is connected to a terminal, return a `terminal-output` handle
+⍝? allowing further interaction with it.
+#import("wasi:cli/terminal-stdout", "get-terminal-stdout")
+micro get_terminal_stdout() -> TerminalOutput? { }
+
+alias typus TerminalOutput: TerminalOutput { }
+
+⍝? If stderr is connected to a terminal, return a `terminal-output` handle
+⍝? allowing further interaction with it.
+#import("wasi:cli/terminal-stderr", "get-terminal-stderr")
+micro get_terminal_stderr() -> TerminalOutput? { }
+

@@ -1,0 +1,627 @@
+alias typus InputStream: InputStream { }
+
+alias typus OutputStream: OutputStream { }
+
+alias typus Error: Error { }
+
+alias typus Datetime: Datetime { }
+
+⍝? File size or length of a region within a file.
+alias typus Filesize: u64 { }
+
+⍝? The type of a filesystem object referenced by a descriptor.
+⍝? 
+⍝? Note: This was called `filetype` in earlier versions of WASI.
+enumerate DescriptorType {
+    ⍝? The type of the descriptor or file is unknown or is different from
+    ⍝? any of the other types specified.
+    #export("unknown")
+    Unknown,
+    ⍝? The descriptor refers to a block device inode.
+    #export("block-device")
+    BlockDevice,
+    ⍝? The descriptor refers to a character device inode.
+    #export("character-device")
+    CharacterDevice,
+    ⍝? The descriptor refers to a directory inode.
+    #export("directory")
+    Directory,
+    ⍝? The descriptor refers to a named pipe.
+    #export("fifo")
+    Fifo,
+    ⍝? The file refers to a symbolic link inode.
+    #export("symbolic-link")
+    SymbolicLink,
+    ⍝? The descriptor refers to a regular file inode.
+    #export("regular-file")
+    RegularFile,
+    ⍝? The descriptor refers to a socket.
+    #export("socket")
+    Socket,
+}
+
+⍝? Descriptor flags.
+⍝? 
+⍝? Note: This was called `fdflags` in earlier versions of WASI.
+flags DescriptorFlags {
+    ⍝? Read mode: Data can be read.
+    #export("read")
+    read,
+    ⍝? Write mode: Data can be written to.
+    #export("write")
+    write,
+    ⍝? Request that writes be performed according to synchronized I/O file
+    ⍝? integrity completion. The data stored in the file and the file's
+    ⍝? metadata are synchronized. This is similar to `O_SYNC` in POSIX.
+    ⍝? 
+    ⍝? The precise semantics of this operation have not yet been defined for
+    ⍝? WASI. At this time, it should be interpreted as a request, and not a
+    ⍝? requirement.
+    #export("file-integrity-sync")
+    file_integrity_sync,
+    ⍝? Request that writes be performed according to synchronized I/O data
+    ⍝? integrity completion. Only the data stored in the file is
+    ⍝? synchronized. This is similar to `O_DSYNC` in POSIX.
+    ⍝? 
+    ⍝? The precise semantics of this operation have not yet been defined for
+    ⍝? WASI. At this time, it should be interpreted as a request, and not a
+    ⍝? requirement.
+    #export("data-integrity-sync")
+    data_integrity_sync,
+    ⍝? Requests that reads be performed at the same level of integrety
+    ⍝? requested for writes. This is similar to `O_RSYNC` in POSIX.
+    ⍝? 
+    ⍝? The precise semantics of this operation have not yet been defined for
+    ⍝? WASI. At this time, it should be interpreted as a request, and not a
+    ⍝? requirement.
+    #export("requested-write-sync")
+    requested_write_sync,
+    ⍝? Mutating directories mode: Directory contents may be mutated.
+    ⍝? 
+    ⍝? When this flag is unset on a descriptor, operations using the
+    ⍝? descriptor which would create, rename, delete, modify the data or
+    ⍝? metadata of filesystem objects, or obtain another handle which
+    ⍝? would permit any of those, shall fail with `error-code::read-only` if
+    ⍝? they would otherwise succeed.
+    ⍝? 
+    ⍝? This may only be set on directories.
+    #export("mutate-directory")
+    mutate_directory,
+}
+
+⍝? Flags determining the method of how paths are resolved.
+flags PathFlags {
+    ⍝? As long as the resolved path corresponds to a symbolic link, it is
+    ⍝? expanded.
+    #export("symlink-follow")
+    symlink_follow,
+}
+
+⍝? Open flags used by `open-at`.
+flags OpenFlags {
+    ⍝? Create file if it does not exist, similar to `O_CREAT` in POSIX.
+    #export("create")
+    create,
+    ⍝? Fail if not a directory, similar to `O_DIRECTORY` in POSIX.
+    #export("directory")
+    directory,
+    ⍝? Fail if file already exists, similar to `O_EXCL` in POSIX.
+    #export("exclusive")
+    exclusive,
+    ⍝? Truncate file to size 0, similar to `O_TRUNC` in POSIX.
+    #export("truncate")
+    truncate,
+}
+
+⍝? Number of hard links to an inode.
+alias typus LinkCount: u64 { }
+
+⍝? File attributes.
+⍝? 
+⍝? Note: This was called `filestat` in earlier versions of WASI.
+class DescriptorStat {
+    ⍝? File type.
+    type: DescriptorType,
+    ⍝? Number of hard links to the file.
+    link_count: u64,
+    ⍝? For regular files, the file size in bytes. For symbolic links, the
+    ⍝? length in bytes of the pathname contained in the symbolic link.
+    size: u64,
+    ⍝? Last data access timestamp.
+    ⍝? 
+    ⍝? If the `option` is none, the platform doesn't maintain an access
+    ⍝? timestamp for this file.
+    data_access_timestamp: Datetime?,
+    ⍝? Last data modification timestamp.
+    ⍝? 
+    ⍝? If the `option` is none, the platform doesn't maintain a
+    ⍝? modification timestamp for this file.
+    data_modification_timestamp: Datetime?,
+    ⍝? Last file status-change timestamp.
+    ⍝? 
+    ⍝? If the `option` is none, the platform doesn't maintain a
+    ⍝? status-change timestamp for this file.
+    status_change_timestamp: Datetime?,
+}
+
+⍝? When setting a timestamp, this gives the value to set it to.
+unite NewTimestamp {
+    ⍝? Leave the timestamp set to its previous value.
+    #export("no-change")
+    NoChange,
+    ⍝? Set the timestamp to the current time of the system clock associated
+    ⍝? with the filesystem.
+    #export("now")
+    Now,
+    ⍝? Set the timestamp to the given value.
+    #export("timestamp")
+    Timestamp {
+        value: Datetime
+    },
+}
+
+⍝? A directory entry.
+class DirectoryEntry {
+    ⍝? The type of the file referred to by this directory entry.
+    type: DescriptorType,
+    ⍝? The name of the object.
+    name: utf8,
+}
+
+⍝? Error codes returned by functions, similar to `errno` in POSIX.
+⍝? Not all of these error codes are returned by the functions provided by this
+⍝? API; some are used in higher-level library layers, and others are provided
+⍝? merely for alignment with POSIX.
+enumerate ErrorCode {
+    ⍝? Permission denied, similar to `EACCES` in POSIX.
+    #export("access")
+    Access,
+    ⍝? Resource unavailable, or operation would block, similar to `EAGAIN` and `EWOULDBLOCK` in POSIX.
+    #export("would-block")
+    WouldBlock,
+    ⍝? Connection already in progress, similar to `EALREADY` in POSIX.
+    #export("already")
+    Already,
+    ⍝? Bad descriptor, similar to `EBADF` in POSIX.
+    #export("bad-descriptor")
+    BadDescriptor,
+    ⍝? Device or resource busy, similar to `EBUSY` in POSIX.
+    #export("busy")
+    Busy,
+    ⍝? Resource deadlock would occur, similar to `EDEADLK` in POSIX.
+    #export("deadlock")
+    Deadlock,
+    ⍝? Storage quota exceeded, similar to `EDQUOT` in POSIX.
+    #export("quota")
+    Quota,
+    ⍝? File exists, similar to `EEXIST` in POSIX.
+    #export("exist")
+    Exist,
+    ⍝? File too large, similar to `EFBIG` in POSIX.
+    #export("file-too-large")
+    FileTooLarge,
+    ⍝? Illegal byte sequence, similar to `EILSEQ` in POSIX.
+    #export("illegal-byte-sequence")
+    IllegalByteSequence,
+    ⍝? Operation in progress, similar to `EINPROGRESS` in POSIX.
+    #export("in-progress")
+    InProgress,
+    ⍝? Interrupted function, similar to `EINTR` in POSIX.
+    #export("interrupted")
+    Interrupted,
+    ⍝? Invalid argument, similar to `EINVAL` in POSIX.
+    #export("invalid")
+    Invalid,
+    ⍝? I/O error, similar to `EIO` in POSIX.
+    #export("io")
+    Io,
+    ⍝? Is a directory, similar to `EISDIR` in POSIX.
+    #export("is-directory")
+    IsDirectory,
+    ⍝? Too many levels of symbolic links, similar to `ELOOP` in POSIX.
+    #export("loop")
+    Loop,
+    ⍝? Too many links, similar to `EMLINK` in POSIX.
+    #export("too-many-links")
+    TooManyLinks,
+    ⍝? Message too large, similar to `EMSGSIZE` in POSIX.
+    #export("message-size")
+    MessageSize,
+    ⍝? Filename too long, similar to `ENAMETOOLONG` in POSIX.
+    #export("name-too-long")
+    NameTooLong,
+    ⍝? No such device, similar to `ENODEV` in POSIX.
+    #export("no-device")
+    NoDevice,
+    ⍝? No such file or directory, similar to `ENOENT` in POSIX.
+    #export("no-entry")
+    NoEntry,
+    ⍝? No locks available, similar to `ENOLCK` in POSIX.
+    #export("no-lock")
+    NoLock,
+    ⍝? Not enough space, similar to `ENOMEM` in POSIX.
+    #export("insufficient-memory")
+    InsufficientMemory,
+    ⍝? No space left on device, similar to `ENOSPC` in POSIX.
+    #export("insufficient-space")
+    InsufficientSpace,
+    ⍝? Not a directory or a symbolic link to a directory, similar to `ENOTDIR` in POSIX.
+    #export("not-directory")
+    NotDirectory,
+    ⍝? Directory not empty, similar to `ENOTEMPTY` in POSIX.
+    #export("not-empty")
+    NotEmpty,
+    ⍝? State not recoverable, similar to `ENOTRECOVERABLE` in POSIX.
+    #export("not-recoverable")
+    NotRecoverable,
+    ⍝? Not supported, similar to `ENOTSUP` and `ENOSYS` in POSIX.
+    #export("unsupported")
+    Unsupported,
+    ⍝? Inappropriate I/O control operation, similar to `ENOTTY` in POSIX.
+    #export("no-tty")
+    NoTty,
+    ⍝? No such device or address, similar to `ENXIO` in POSIX.
+    #export("no-such-device")
+    NoSuchDevice,
+    ⍝? Value too large to be stored in data type, similar to `EOVERFLOW` in POSIX.
+    #export("overflow")
+    Overflow,
+    ⍝? Operation not permitted, similar to `EPERM` in POSIX.
+    #export("not-permitted")
+    NotPermitted,
+    ⍝? Broken pipe, similar to `EPIPE` in POSIX.
+    #export("pipe")
+    Pipe,
+    ⍝? Read-only file system, similar to `EROFS` in POSIX.
+    #export("read-only")
+    ReadOnly,
+    ⍝? Invalid seek, similar to `ESPIPE` in POSIX.
+    #export("invalid-seek")
+    InvalidSeek,
+    ⍝? Text file busy, similar to `ETXTBSY` in POSIX.
+    #export("text-file-busy")
+    TextFileBusy,
+    ⍝? Cross-device link, similar to `EXDEV` in POSIX.
+    #export("cross-device")
+    CrossDevice,
+}
+
+⍝? File or memory access pattern advisory information.
+enumerate Advice {
+    ⍝? The application has no advice to give on its behavior with respect
+    ⍝? to the specified data.
+    #export("normal")
+    Normal,
+    ⍝? The application expects to access the specified data sequentially
+    ⍝? from lower offsets to higher offsets.
+    #export("sequential")
+    Sequential,
+    ⍝? The application expects to access the specified data in a random
+    ⍝? order.
+    #export("random")
+    Random,
+    ⍝? The application expects to access the specified data in the near
+    ⍝? future.
+    #export("will-need")
+    WillNeed,
+    ⍝? The application expects that it will not access the specified data
+    ⍝? in the near future.
+    #export("dont-need")
+    DontNeed,
+    ⍝? The application expects to access the specified data once and then
+    ⍝? not reuse it thereafter.
+    #export("no-reuse")
+    NoReuse,
+}
+
+⍝? A 128-bit hash value, split into parts because wasm doesn't have a
+⍝? 128-bit integer type.
+class MetadataHashValue {
+    ⍝? 64 bits of a 128-bit hash value.
+    lower: u64,
+    ⍝? Another 64 bits of a 128-bit hash value.
+    upper: u64,
+}
+
+⍝? A descriptor is a reference to a filesystem object, which may be a file,
+⍝? directory, named pipe, special file, or other object on which filesystem
+⍝? calls may be made.
+#import("wasi:filesystem/types", "descriptor")
+class Descriptor {
+    ⍝? Return a stream for reading from a file, if available.
+    ⍝? 
+    ⍝? May fail with an error-code describing why the file cannot be read.
+    ⍝? 
+    ⍝? Multiple read, write, and append streams may be active on the same open
+    ⍝? file and they do not interfere with each other.
+    ⍝? 
+    ⍝? Note: This allows using `read-stream`, which is similar to `read` in POSIX.
+    #import("wasi:filesystem/types", "[method]descriptor.read-via-stream")
+    read_via_stream(self, offset: u64) -> Result<InputStream, ErrorCode> { }
+
+    ⍝? Return a stream for writing to a file, if available.
+    ⍝? 
+    ⍝? May fail with an error-code describing why the file cannot be written.
+    ⍝? 
+    ⍝? Note: This allows using `write-stream`, which is similar to `write` in
+    ⍝? POSIX.
+    #import("wasi:filesystem/types", "[method]descriptor.write-via-stream")
+    write_via_stream(self, offset: u64) -> Result<OutputStream, ErrorCode> { }
+
+    ⍝? Return a stream for appending to a file, if available.
+    ⍝? 
+    ⍝? May fail with an error-code describing why the file cannot be appended.
+    ⍝? 
+    ⍝? Note: This allows using `write-stream`, which is similar to `write` with
+    ⍝? `O_APPEND` in in POSIX.
+    #import("wasi:filesystem/types", "[method]descriptor.append-via-stream")
+    append_via_stream(self) -> Result<OutputStream, ErrorCode> { }
+
+    ⍝? Provide file advisory information on a descriptor.
+    ⍝? 
+    ⍝? This is similar to `posix_fadvise` in POSIX.
+    #import("wasi:filesystem/types", "[method]descriptor.advise")
+    advise(self, offset: u64, length: u64, advice: Advice) -> Result<(), ErrorCode> { }
+
+    ⍝? Synchronize the data of a file to disk.
+    ⍝? 
+    ⍝? This function succeeds with no effect if the file descriptor is not
+    ⍝? opened for writing.
+    ⍝? 
+    ⍝? Note: This is similar to `fdatasync` in POSIX.
+    #import("wasi:filesystem/types", "[method]descriptor.sync-data")
+    sync_data(self) -> Result<(), ErrorCode> { }
+
+    ⍝? Get flags associated with a descriptor.
+    ⍝? 
+    ⍝? Note: This returns similar flags to `fcntl(fd, F_GETFL)` in POSIX.
+    ⍝? 
+    ⍝? Note: This returns the value that was the `fs_flags` value returned
+    ⍝? from `fdstat_get` in earlier versions of WASI.
+    #import("wasi:filesystem/types", "[method]descriptor.get-flags")
+    get_flags(self) -> Result<DescriptorFlags, ErrorCode> { }
+
+    ⍝? Get the dynamic type of a descriptor.
+    ⍝? 
+    ⍝? Note: This returns the same value as the `type` field of the `fd-stat`
+    ⍝? returned by `stat`, `stat-at` and similar.
+    ⍝? 
+    ⍝? Note: This returns similar flags to the `st_mode & S_IFMT` value provided
+    ⍝? by `fstat` in POSIX.
+    ⍝? 
+    ⍝? Note: This returns the value that was the `fs_filetype` value returned
+    ⍝? from `fdstat_get` in earlier versions of WASI.
+    #import("wasi:filesystem/types", "[method]descriptor.get-type")
+    get_type(self) -> Result<DescriptorType, ErrorCode> { }
+
+    ⍝? Adjust the size of an open file. If this increases the file's size, the
+    ⍝? extra bytes are filled with zeros.
+    ⍝? 
+    ⍝? Note: This was called `fd_filestat_set_size` in earlier versions of WASI.
+    #import("wasi:filesystem/types", "[method]descriptor.set-size")
+    set_size(self, size: u64) -> Result<(), ErrorCode> { }
+
+    ⍝? Adjust the timestamps of an open file or directory.
+    ⍝? 
+    ⍝? Note: This is similar to `futimens` in POSIX.
+    ⍝? 
+    ⍝? Note: This was called `fd_filestat_set_times` in earlier versions of WASI.
+    #import("wasi:filesystem/types", "[method]descriptor.set-times")
+    set_times(self, data_access_timestamp: NewTimestamp, data_modification_timestamp: NewTimestamp) -> Result<(), ErrorCode> { }
+
+    ⍝? Read from a descriptor, without using and updating the descriptor's offset.
+    ⍝? 
+    ⍝? This function returns a list of bytes containing the data that was
+    ⍝? read, along with a bool which, when true, indicates that the end of the
+    ⍝? file was reached. The returned list will contain up to `length` bytes; it
+    ⍝? may return fewer than requested, if the end of the file is reached or
+    ⍝? if the I/O operation is interrupted.
+    ⍝? 
+    ⍝? In the future, this may change to return a `stream<u8, error-code>`.
+    ⍝? 
+    ⍝? Note: This is similar to `pread` in POSIX.
+    #import("wasi:filesystem/types", "[method]descriptor.read")
+    read(self, length: u64, offset: u64) -> Result<(Array<u8>, bool), ErrorCode> { }
+
+    ⍝? Write to a descriptor, without using and updating the descriptor's offset.
+    ⍝? 
+    ⍝? It is valid to write past the end of a file; the file is extended to the
+    ⍝? extent of the write, with bytes between the previous end and the start of
+    ⍝? the write set to zero.
+    ⍝? 
+    ⍝? In the future, this may change to take a `stream<u8, error-code>`.
+    ⍝? 
+    ⍝? Note: This is similar to `pwrite` in POSIX.
+    #import("wasi:filesystem/types", "[method]descriptor.write")
+    write(self, buffer: Array<u8>, offset: u64) -> Result<u64, ErrorCode> { }
+
+    ⍝? Read directory entries from a directory.
+    ⍝? 
+    ⍝? On filesystems where directories contain entries referring to themselves
+    ⍝? and their parents, often named `.` and `..` respectively, these entries
+    ⍝? are omitted.
+    ⍝? 
+    ⍝? This always returns a new stream which starts at the beginning of the
+    ⍝? directory. Multiple streams may be active on the same directory, and they
+    ⍝? do not interfere with each other.
+    #import("wasi:filesystem/types", "[method]descriptor.read-directory")
+    read_directory(self) -> Result<DirectoryEntryStream, ErrorCode> { }
+
+    ⍝? Synchronize the data and metadata of a file to disk.
+    ⍝? 
+    ⍝? This function succeeds with no effect if the file descriptor is not
+    ⍝? opened for writing.
+    ⍝? 
+    ⍝? Note: This is similar to `fsync` in POSIX.
+    #import("wasi:filesystem/types", "[method]descriptor.sync")
+    sync(self) -> Result<(), ErrorCode> { }
+
+    ⍝? Create a directory.
+    ⍝? 
+    ⍝? Note: This is similar to `mkdirat` in POSIX.
+    #import("wasi:filesystem/types", "[method]descriptor.create-directory-at")
+    create_directory_at(self, path: utf8) -> Result<(), ErrorCode> { }
+
+    ⍝? Return the attributes of an open file or directory.
+    ⍝? 
+    ⍝? Note: This is similar to `fstat` in POSIX, except that it does not return
+    ⍝? device and inode information. For testing whether two descriptors refer to
+    ⍝? the same underlying filesystem object, use `is-same-object`. To obtain
+    ⍝? additional data that can be used do determine whether a file has been
+    ⍝? modified, use `metadata-hash`.
+    ⍝? 
+    ⍝? Note: This was called `fd_filestat_get` in earlier versions of WASI.
+    #import("wasi:filesystem/types", "[method]descriptor.stat")
+    stat(self) -> Result<DescriptorStat, ErrorCode> { }
+
+    ⍝? Return the attributes of a file or directory.
+    ⍝? 
+    ⍝? Note: This is similar to `fstatat` in POSIX, except that it does not
+    ⍝? return device and inode information. See the `stat` description for a
+    ⍝? discussion of alternatives.
+    ⍝? 
+    ⍝? Note: This was called `path_filestat_get` in earlier versions of WASI.
+    #import("wasi:filesystem/types", "[method]descriptor.stat-at")
+    stat_at(self, path_flags: PathFlags, path: utf8) -> Result<DescriptorStat, ErrorCode> { }
+
+    ⍝? Adjust the timestamps of a file or directory.
+    ⍝? 
+    ⍝? Note: This is similar to `utimensat` in POSIX.
+    ⍝? 
+    ⍝? Note: This was called `path_filestat_set_times` in earlier versions of
+    ⍝? WASI.
+    #import("wasi:filesystem/types", "[method]descriptor.set-times-at")
+    set_times_at(self, path_flags: PathFlags, path: utf8, data_access_timestamp: NewTimestamp, data_modification_timestamp: NewTimestamp) -> Result<(), ErrorCode> { }
+
+    ⍝? Create a hard link.
+    ⍝? 
+    ⍝? Note: This is similar to `linkat` in POSIX.
+    #import("wasi:filesystem/types", "[method]descriptor.link-at")
+    link_at(self, old_path_flags: PathFlags, old_path: utf8, new_descriptor: &Descriptor, new_path: utf8) -> Result<(), ErrorCode> { }
+
+    ⍝? Open a file or directory.
+    ⍝? 
+    ⍝? The returned descriptor is not guaranteed to be the lowest-numbered
+    ⍝? descriptor not currently open/ it is randomized to prevent applications
+    ⍝? from depending on making assumptions about indexes, since this is
+    ⍝? error-prone in multi-threaded contexts. The returned descriptor is
+    ⍝? guaranteed to be less than 2**31.
+    ⍝? 
+    ⍝? If `flags` contains `descriptor-flags::mutate-directory`, and the base
+    ⍝? descriptor doesn't have `descriptor-flags::mutate-directory` set,
+    ⍝? `open-at` fails with `error-code::read-only`.
+    ⍝? 
+    ⍝? If `flags` contains `write` or `mutate-directory`, or `open-flags`
+    ⍝? contains `truncate` or `create`, and the base descriptor doesn't have
+    ⍝? `descriptor-flags::mutate-directory` set, `open-at` fails with
+    ⍝? `error-code::read-only`.
+    ⍝? 
+    ⍝? Note: This is similar to `openat` in POSIX.
+    #import("wasi:filesystem/types", "[method]descriptor.open-at")
+    open_at(self, path_flags: PathFlags, path: utf8, open_flags: OpenFlags, `flags`: DescriptorFlags) -> Result<Descriptor, ErrorCode> { }
+
+    ⍝? Read the contents of a symbolic link.
+    ⍝? 
+    ⍝? If the contents contain an absolute or rooted path in the underlying
+    ⍝? filesystem, this function fails with `error-code::not-permitted`.
+    ⍝? 
+    ⍝? Note: This is similar to `readlinkat` in POSIX.
+    #import("wasi:filesystem/types", "[method]descriptor.readlink-at")
+    readlink_at(self, path: utf8) -> Result<utf8, ErrorCode> { }
+
+    ⍝? Remove a directory.
+    ⍝? 
+    ⍝? Return `error-code::not-empty` if the directory is not empty.
+    ⍝? 
+    ⍝? Note: This is similar to `unlinkat(fd, path, AT_REMOVEDIR)` in POSIX.
+    #import("wasi:filesystem/types", "[method]descriptor.remove-directory-at")
+    remove_directory_at(self, path: utf8) -> Result<(), ErrorCode> { }
+
+    ⍝? Rename a filesystem object.
+    ⍝? 
+    ⍝? Note: This is similar to `renameat` in POSIX.
+    #import("wasi:filesystem/types", "[method]descriptor.rename-at")
+    rename_at(self, old_path: utf8, new_descriptor: &Descriptor, new_path: utf8) -> Result<(), ErrorCode> { }
+
+    ⍝? Create a symbolic link (also known as a "symlink").
+    ⍝? 
+    ⍝? If `old-path` starts with `/`, the function fails with
+    ⍝? `error-code::not-permitted`.
+    ⍝? 
+    ⍝? Note: This is similar to `symlinkat` in POSIX.
+    #import("wasi:filesystem/types", "[method]descriptor.symlink-at")
+    symlink_at(self, old_path: utf8, new_path: utf8) -> Result<(), ErrorCode> { }
+
+    ⍝? Unlink a filesystem object that is not a directory.
+    ⍝? 
+    ⍝? Return `error-code::is-directory` if the path refers to a directory.
+    ⍝? Note: This is similar to `unlinkat(fd, path, 0)` in POSIX.
+    #import("wasi:filesystem/types", "[method]descriptor.unlink-file-at")
+    unlink_file_at(self, path: utf8) -> Result<(), ErrorCode> { }
+
+    ⍝? Test whether two descriptors refer to the same filesystem object.
+    ⍝? 
+    ⍝? In POSIX, this corresponds to testing whether the two descriptors have the
+    ⍝? same device (`st_dev`) and inode (`st_ino` or `d_ino`) numbers.
+    ⍝? wasi-filesystem does not expose device and inode numbers, so this function
+    ⍝? may be used instead.
+    #import("wasi:filesystem/types", "[method]descriptor.is-same-object")
+    is_same_object(self, other: &Descriptor) -> bool { }
+
+    ⍝? Return a hash of the metadata associated with a filesystem object referred
+    ⍝? to by a descriptor.
+    ⍝? 
+    ⍝? This returns a hash of the last-modification timestamp and file size, and
+    ⍝? may also include the inode number, device number, birth timestamp, and
+    ⍝? other metadata fields that may change when the file is modified or
+    ⍝? replaced. It may also include a secret value chosen by the
+    ⍝? implementation and not otherwise exposed.
+    ⍝? 
+    ⍝? Implementations are encourated to provide the following properties:
+    ⍝? 
+    ⍝? - If the file is not modified or replaced, the computed hash value should
+    ⍝? usually not change.
+    ⍝? - If the object is modified or replaced, the computed hash value should
+    ⍝? usually change.
+    ⍝? - The inputs to the hash should not be easily computable from the
+    ⍝? computed hash.
+    ⍝? 
+    ⍝? However, none of these is required.
+    #import("wasi:filesystem/types", "[method]descriptor.metadata-hash")
+    metadata_hash(self) -> Result<MetadataHashValue, ErrorCode> { }
+
+    ⍝? Return a hash of the metadata associated with a filesystem object referred
+    ⍝? to by a directory descriptor and a relative path.
+    ⍝? 
+    ⍝? This performs the same hash computation as `metadata-hash`.
+    #import("wasi:filesystem/types", "[method]descriptor.metadata-hash-at")
+    metadata_hash_at(self, path_flags: PathFlags, path: utf8) -> Result<MetadataHashValue, ErrorCode> { }
+
+}
+⍝? A stream of directory entries.
+#import("wasi:filesystem/types", "directory-entry-stream")
+class DirectoryEntryStream {
+    ⍝? Read a single directory entry from a `directory-entry-stream`.
+    #import("wasi:filesystem/types", "[method]directory-entry-stream.read-directory-entry")
+    read_directory_entry(self) -> Result<DirectoryEntry?, ErrorCode> { }
+
+}
+⍝? Attempts to extract a filesystem-related `error-code` from the stream
+⍝? `error` provided.
+⍝? 
+⍝? Stream operations which return `stream-error::last-operation-failed`
+⍝? have a payload with more information about the operation that failed.
+⍝? This payload can be passed through to this function to see if there's
+⍝? filesystem-related information about the error to return.
+⍝? 
+⍝? Note that this function is fallible because not all stream-related
+⍝? errors are filesystem-related errors.
+#import("wasi:filesystem/types", "filesystem-error-code")
+micro filesystem_error_code(err: &Error) -> ErrorCode? { }
+
+alias typus Descriptor: Descriptor { }
+
+⍝? Return the set of preopened directories, and their path.
+#import("wasi:filesystem/preopens", "get-directories")
+micro get_directories() -> Array<(Descriptor, utf8)> { }
+
