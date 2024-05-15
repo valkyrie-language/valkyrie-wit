@@ -3,7 +3,6 @@ use std::{fs::File, io::Write, path::Path};
 use valkyrie_wit::ForeignGenerator;
 use wit_bindgen_core::wit_parser::{Enum, EnumCase, Field, Function, FunctionKind, Record, Results, Type, TypeDefKind};
 use wit_component::ComponentEncoder;
-use wit_parser::Handle;
 
 mod codegen;
 #[test]

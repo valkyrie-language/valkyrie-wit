@@ -1,13 +1,5 @@
 use anyhow::Result;
-use std::mem::MaybeUninit;
-use wasmtime::{
-    component::{
-        __internal::{CanonicalAbiInfo, InstanceType, InterfaceType, LiftContext, LowerContext},
-        *,
-    },
-    Config, Engine, Store,
-};
-use wit_test::ValkyrieVM;
+use wasmtime::{component::*, Config, Engine, Store};
 
 #[test]
 fn ready() {

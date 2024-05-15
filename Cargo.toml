@@ -2,8 +2,8 @@
 resolver = "2"
 members = ["projects/*"]
 default-members = [
-    "projects/wit-core",
-    "projects/wit-codegen",
+    "projects/valkyrie-ffi",
+    "projects/valkyrie-wit",
     "projects/wit-z-runner",
 ]
 exclude = [
