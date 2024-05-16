@@ -1,4 +1,4 @@
-namespace homestar.host;
+namespace host;
 
 class Time {
     seconds: u64,
