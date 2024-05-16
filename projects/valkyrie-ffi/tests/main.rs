@@ -7,7 +7,7 @@ fn ready() {
 }
 
 #[test]
-fn load_all() {
+fn load_deps() {
     let here = Path::new(env!("CARGO_MANIFEST_DIR"));
     let resolved = ValkyrieFFI::new_deps(here.join("tests/wasi-cloud-core/wit")).unwrap();
     let here = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests");
