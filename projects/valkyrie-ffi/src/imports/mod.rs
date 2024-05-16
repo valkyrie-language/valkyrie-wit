@@ -1,7 +1,10 @@
 use crate::helpers::{FunctionContext, TypeContext, WriteDefine, WriteReference};
 use convert_case::{Case, Casing};
 use std::{fmt::Write, io::Write as _, path::Path};
-use wit_parser::{Function, FunctionKind, Handle, Interface, Package, Resolve, Results, Type, TypeDef, TypeDefKind, TypeId};
+use wit_parser::{
+    decoding::DecodedWasm, Function, FunctionKind, Handle, Interface, Package, Resolve, Results, Type, TypeDef, TypeDefKind,
+    TypeId,
+};
 
 mod visit_types;
 
@@ -10,11 +13,26 @@ pub struct ValkyrieFFI {
 }
 
 impl ValkyrieFFI {
-    pub fn new<P: AsRef<Path>>(directory: P) -> anyhow::Result<Self> {
+    pub fn new_deps<P: AsRef<Path>>(directory: P) -> anyhow::Result<Self> {
         let mut resolved = Resolve::new();
         resolved.push_dir(directory.as_ref())?;
         Ok(Self { cache: resolved })
     }
+    pub fn new_wasm(binary: &[u8]) -> anyhow::Result<Self> {
+        let wasm = wit_component::decode(binary)?;
+        println!("decoding");
+        match wasm {
+            DecodedWasm::WitPackage(resolved, id) => {
+                println!("package: {:?}", id);
+                Ok(Self { cache: resolved })
+            }
+            DecodedWasm::Component(resolved, id) => {
+                println!("world: {:?}", id);
+                Ok(Self { cache: resolved })
+            }
+        }
+    }
+
     pub fn generate<P: AsRef<Path>>(&self, output: P) -> std::io::Result<()> {
         let output = output.as_ref();
         if !output.is_dir() {
@@ -58,11 +76,10 @@ impl ValkyrieFFI {
         for (name, item) in interface.types.iter() {
             match self.cache.types.get(*item) {
                 Some(s) => {
-                    if let Err(e) = s.kind.write_define(
-                        file,
-                        TypeContext { ffi: &self, interface, namespace: &namespace, wasi_name: "", def: &s },
-                    ) {
-                        tracing::error!("error exporting type: {:?}", e)
+                    let ctx = TypeContext { ffi: &self, interface, namespace: &namespace, wasi_name: "", def: &s };
+                    match s.kind.write_define(file, ctx) {
+                        Ok(..) => {}
+                        Err(e) => tracing::error!("error exporting type: {:?}", e),
                     }
                 }
                 None => tracing::error!("type not found: {:?}", name),

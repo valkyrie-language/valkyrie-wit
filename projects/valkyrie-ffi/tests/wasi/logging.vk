@@ -1,0 +1,18 @@
+enumerate Level {
+    #export("trace")
+    Trace,
+    #export("debug")
+    Debug,
+    #export("info")
+    Info,
+    #export("warn")
+    Warn,
+    #export("error")
+    Error,
+    #export("critical")
+    Critical,
+}
+
+#import("wasi:logging/logging", "log")
+micro log(level: Level, context: utf8, message: utf8) -> () { }
+
