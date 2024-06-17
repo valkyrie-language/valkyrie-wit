@@ -1,76 +1,76 @@
 alias typus InputStream = InputStream;
 alias typus OutputStream = OutputStream;
-⍝? name of a container, a collection of objects.
-⍝? The container name may be any valid UTF-8 string.
+#? name of a container, a collection of objects.
+#? The container name may be any valid UTF-8 string.
 alias typus ContainerName = utf8;
-⍝? name of an object within a container
-⍝? The object name may be any valid UTF-8 string.
+#? name of an object within a container
+#? The object name may be any valid UTF-8 string.
 alias typus ObjectName = utf8;
-⍝? TODO: define timestamp to include seconds since
-⍝? Unix epoch and nanoseconds
-⍝? https://github.com/WebAssembly/wasi-blob-store/issues/7
+#? TODO: define timestamp to include seconds since
+#? Unix epoch and nanoseconds
+#? https://github.com/WebAssembly/wasi-blob-store/issues/7
 alias typus Timestamp = u64;
-⍝? size of an object, in bytes
+#? size of an object, in bytes
 alias typus ObjectSize = u64;
 alias typus Error = utf8;
-⍝? information about a container
+#? information about a container
 class ContainerMetadata {
-    ⍝? the container's name
+    #? the container's name
     name: utf8,
-    ⍝? date and time container was created
+    #? date and time container was created
     created_at: u64,
 }
 
-⍝? information about an object
+#? information about an object
 class ObjectMetadata {
-    ⍝? the object's name
+    #? the object's name
     name: utf8,
-    ⍝? the object's parent container
+    #? the object's parent container
     container: utf8,
-    ⍝? date and time the object was created
+    #? date and time the object was created
     created_at: u64,
-    ⍝? size of the object, in bytes
+    #? size of the object, in bytes
     size: u64,
 }
 
-⍝? identifier for an object that includes its container name
+#? identifier for an object that includes its container name
 class ObjectId {
     container: utf8,
     object: utf8,
 }
 
-⍝? A data is the data stored in a data blob. The value can be of any type
-⍝? that can be represented in a byte array. It provides a way to write the value
-⍝? to the output-stream defined in the `wasi-io` interface.
-⍝? Soon: switch to `resource value { ... }`
-#import("wasi:blobstore/types", "outgoing-value")
+#? A data is the data stored in a data blob. The value can be of any type
+#? that can be represented in a byte array. It provides a way to write the value
+#? to the output-stream defined in the `wasi-io` interface.
+#? Soon: switch to `resource value { ... }`
+↯import("wasi:blobstore/types", "outgoing-value")
 resource class OutgoingValue {
-    #import("wasi:blobstore/types", "[static]outgoing-value.new-outgoing-value")
-    new_outgoing_value() -> OutgoingValue { }
+    ↯import("wasi:blobstore/types", "[static]outgoing-value.new-outgoing-value")
+    new_outgoing_value(): OutgoingValue { }
 
-    #import("wasi:blobstore/types", "[method]outgoing-value.outgoing-value-write-body")
-    outgoing_value_write_body(self) -> Result<OutputStream, ()> { }
+    ↯import("wasi:blobstore/types", "[method]outgoing-value.outgoing-value-write-body")
+    outgoing_value_write_body(self): Result<OutputStream, ()> { }
 
 }
-⍝? A incoming-value is a wrapper around a value. It provides a way to read the value
-⍝? from the input-stream defined in the `wasi-io` interface.
-⍝? 
-⍝? The incoming-value provides two ways to consume the value:
-⍝? 1. `incoming-value-consume-sync` consumes the value synchronously and returns the
-⍝? value as a list of bytes.
-⍝? 2. `incoming-value-consume-async` consumes the value asynchronously and returns the
-⍝? value as an input-stream.
-⍝? Soon: switch to `resource incoming-value { ... }`
-#import("wasi:blobstore/types", "incoming-value")
+#? A incoming-value is a wrapper around a value. It provides a way to read the value
+#? from the input-stream defined in the `wasi-io` interface.
+#? 
+#? The incoming-value provides two ways to consume the value:
+#? 1. `incoming-value-consume-sync` consumes the value synchronously and returns the
+#? value as a list of bytes.
+#? 2. `incoming-value-consume-async` consumes the value asynchronously and returns the
+#? value as an input-stream.
+#? Soon: switch to `resource incoming-value { ... }`
+↯import("wasi:blobstore/types", "incoming-value")
 resource class IncomingValue {
-    #import("wasi:blobstore/types", "[method]incoming-value.incoming-value-consume-sync")
-    incoming_value_consume_sync(self) -> Result<Array<u8>, utf8> { }
+    ↯import("wasi:blobstore/types", "[method]incoming-value.incoming-value-consume-sync")
+    incoming_value_consume_sync(self): Result<Array<u8>, utf8> { }
 
-    #import("wasi:blobstore/types", "[method]incoming-value.incoming-value-consume-async")
-    incoming_value_consume_async(self) -> Result<InputStream, utf8> { }
+    ↯import("wasi:blobstore/types", "[method]incoming-value.incoming-value-consume-async")
+    incoming_value_consume_async(self): Result<InputStream, utf8> { }
 
-    #import("wasi:blobstore/types", "[method]incoming-value.size")
-    size(self) -> u64 { }
+    ↯import("wasi:blobstore/types", "[method]incoming-value.size")
+    size(self): u64 { }
 
 }
 alias typus IncomingValueAsyncBody = InputStream;
@@ -83,99 +83,99 @@ alias typus IncomingValue = IncomingValue;
 alias typus ObjectMetadata = ObjectMetadata;
 alias typus ObjectName = utf8;
 alias typus OutgoingValue = OutgoingValue;
-⍝? this defines the `container` resource
-#import("wasi:blobstore/container", "container")
+#? this defines the `container` resource
+↯import("wasi:blobstore/container", "container")
 resource class Container {
-    ⍝? returns container name
-    #import("wasi:blobstore/container", "[method]container.name")
-    name(self) -> Result<utf8, utf8> { }
+    #? returns container name
+    ↯import("wasi:blobstore/container", "[method]container.name")
+    name(self): Result<utf8, utf8> { }
 
-    ⍝? returns container metadata
-    #import("wasi:blobstore/container", "[method]container.info")
-    info(self) -> Result<ContainerMetadata, utf8> { }
+    #? returns container metadata
+    ↯import("wasi:blobstore/container", "[method]container.info")
+    info(self): Result<ContainerMetadata, utf8> { }
 
-    ⍝? retrieves an object or portion of an object, as a resource.
-    ⍝? Start and end offsets are inclusive.
-    ⍝? Once a data-blob resource has been created, the underlying bytes are held by the blobstore service for the lifetime
-    ⍝? of the data-blob resource, even if the object they came from is later deleted.
-    #import("wasi:blobstore/container", "[method]container.get-data")
-    get_data(self, name: utf8, start: u64, end: u64) -> Result<IncomingValue, utf8> { }
+    #? retrieves an object or portion of an object, as a resource.
+    #? Start and end offsets are inclusive.
+    #? Once a data-blob resource has been created, the underlying bytes are held by the blobstore service for the lifetime
+    #? of the data-blob resource, even if the object they came from is later deleted.
+    ↯import("wasi:blobstore/container", "[method]container.get-data")
+    get_data(self, name: utf8, start: u64, end: u64): Result<IncomingValue, utf8> { }
 
-    ⍝? creates or replaces an object with the data blob.
-    #import("wasi:blobstore/container", "[method]container.write-data")
-    write_data(self, name: utf8, data: &OutgoingValue) -> Result<(), utf8> { }
+    #? creates or replaces an object with the data blob.
+    ↯import("wasi:blobstore/container", "[method]container.write-data")
+    write_data(self, name: utf8, data: &OutgoingValue): Result<(), utf8> { }
 
-    ⍝? returns list of objects in the container. Order is undefined.
-    #import("wasi:blobstore/container", "[method]container.list-objects")
-    list_objects(self) -> Result<StreamObjectNames, utf8> { }
+    #? returns list of objects in the container. Order is undefined.
+    ↯import("wasi:blobstore/container", "[method]container.list-objects")
+    list_objects(self): Result<StreamObjectNames, utf8> { }
 
-    ⍝? deletes object.
-    ⍝? does not return error if object did not exist.
-    #import("wasi:blobstore/container", "[method]container.delete-object")
-    delete_object(self, name: utf8) -> Result<(), utf8> { }
+    #? deletes object.
+    #? does not return error if object did not exist.
+    ↯import("wasi:blobstore/container", "[method]container.delete-object")
+    delete_object(self, name: utf8): Result<(), utf8> { }
 
-    ⍝? deletes multiple objects in the container
-    #import("wasi:blobstore/container", "[method]container.delete-objects")
-    delete_objects(self, names: Array<utf8>) -> Result<(), utf8> { }
+    #? deletes multiple objects in the container
+    ↯import("wasi:blobstore/container", "[method]container.delete-objects")
+    delete_objects(self, names: Array<utf8>): Result<(), utf8> { }
 
-    ⍝? returns true if the object exists in this container
-    #import("wasi:blobstore/container", "[method]container.has-object")
-    has_object(self, name: utf8) -> Result<bool, utf8> { }
+    #? returns true if the object exists in this container
+    ↯import("wasi:blobstore/container", "[method]container.has-object")
+    has_object(self, name: utf8): Result<bool, utf8> { }
 
-    ⍝? returns metadata for the object
-    #import("wasi:blobstore/container", "[method]container.object-info")
-    object_info(self, name: utf8) -> Result<ObjectMetadata, utf8> { }
+    #? returns metadata for the object
+    ↯import("wasi:blobstore/container", "[method]container.object-info")
+    object_info(self, name: utf8): Result<ObjectMetadata, utf8> { }
 
-    ⍝? removes all objects within the container, leaving the container empty.
-    #import("wasi:blobstore/container", "[method]container.clear")
-    clear(self) -> Result<(), utf8> { }
+    #? removes all objects within the container, leaving the container empty.
+    ↯import("wasi:blobstore/container", "[method]container.clear")
+    clear(self): Result<(), utf8> { }
 
 }
-⍝? this defines the `stream-object-names` resource which is a representation of stream<object-name>
-#import("wasi:blobstore/container", "stream-object-names")
+#? this defines the `stream-object-names` resource which is a representation of stream<object-name>
+↯import("wasi:blobstore/container", "stream-object-names")
 resource class StreamObjectNames {
-    ⍝? reads the next number of objects from the stream
-    ⍝? 
-    ⍝? This function returns the list of objects read, and a boolean indicating if the end of the stream was reached.
-    #import("wasi:blobstore/container", "[method]stream-object-names.read-stream-object-names")
-    read_stream_object_names(self, len: u64) -> Result<(Array<utf8>, bool), utf8> { }
+    #? reads the next number of objects from the stream
+    #? 
+    #? This function returns the list of objects read, and a boolean indicating if the end of the stream was reached.
+    ↯import("wasi:blobstore/container", "[method]stream-object-names.read-stream-object-names")
+    read_stream_object_names(self, len: u64): Result<(Array<utf8>, bool), utf8> { }
 
-    ⍝? skip the next number of objects in the stream
-    ⍝? 
-    ⍝? This function returns the number of objects skipped, and a boolean indicating if the end of the stream was reached.
-    #import("wasi:blobstore/container", "[method]stream-object-names.skip-stream-object-names")
-    skip_stream_object_names(self, num: u64) -> Result<(u64, bool), utf8> { }
+    #? skip the next number of objects in the stream
+    #? 
+    #? This function returns the number of objects skipped, and a boolean indicating if the end of the stream was reached.
+    ↯import("wasi:blobstore/container", "[method]stream-object-names.skip-stream-object-names")
+    skip_stream_object_names(self, num: u64): Result<(u64, bool), utf8> { }
 
 }
 alias typus Container = Container;
 alias typus Error = utf8;
 alias typus ContainerName = utf8;
 alias typus ObjectId = ObjectId;
-⍝? creates a new empty container
-#import("wasi:blobstore/blobstore", "create-container")
-micro create_container(name: utf8) -> Result<Container, utf8> { }
+#? creates a new empty container
+↯import("wasi:blobstore/blobstore", "create-container")
+micro create_container(name: utf8): Result<Container, utf8> { }
 
-⍝? retrieves a container by name
-#import("wasi:blobstore/blobstore", "get-container")
-micro get_container(name: utf8) -> Result<Container, utf8> { }
+#? retrieves a container by name
+↯import("wasi:blobstore/blobstore", "get-container")
+micro get_container(name: utf8): Result<Container, utf8> { }
 
-⍝? deletes a container and all objects within it
-#import("wasi:blobstore/blobstore", "delete-container")
-micro delete_container(name: utf8) -> Result<(), utf8> { }
+#? deletes a container and all objects within it
+↯import("wasi:blobstore/blobstore", "delete-container")
+micro delete_container(name: utf8): Result<(), utf8> { }
 
-⍝? returns true if the container exists
-#import("wasi:blobstore/blobstore", "container-exists")
-micro container_exists(name: utf8) -> Result<bool, utf8> { }
+#? returns true if the container exists
+↯import("wasi:blobstore/blobstore", "container-exists")
+micro container_exists(name: utf8): Result<bool, utf8> { }
 
-⍝? copies (duplicates) an object, to the same or a different container.
-⍝? returns an error if the target container does not exist.
-⍝? overwrites destination object if it already existed.
-#import("wasi:blobstore/blobstore", "copy-object")
-micro copy_object(src: ObjectId, dest: ObjectId) -> Result<(), utf8> { }
+#? copies (duplicates) an object, to the same or a different container.
+#? returns an error if the target container does not exist.
+#? overwrites destination object if it already existed.
+↯import("wasi:blobstore/blobstore", "copy-object")
+micro copy_object(src: ObjectId, dest: ObjectId): Result<(), utf8> { }
 
-⍝? moves or renames an object, to the same or a different container
-⍝? returns an error if the destination container does not exist.
-⍝? overwrites destination object if it already existed.
-#import("wasi:blobstore/blobstore", "move-object")
-micro move_object(src: ObjectId, dest: ObjectId) -> Result<(), utf8> { }
+#? moves or renames an object, to the same or a different container
+#? returns an error if the destination container does not exist.
+#? overwrites destination object if it already existed.
+↯import("wasi:blobstore/blobstore", "move-object")
+micro move_object(src: ObjectId, dest: ObjectId): Result<(), utf8> { }
 

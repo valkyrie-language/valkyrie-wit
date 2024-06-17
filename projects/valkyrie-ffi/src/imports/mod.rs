@@ -18,16 +18,16 @@ impl ValkyrieFFI {
         resolved.push_dir(directory.as_ref())?;
         Ok(Self { cache: resolved })
     }
-    pub fn new_wasm(binary: &[u8]) -> anyhow::Result<Self> {
+    pub fn new_wasm(binary: &[u8], alias: &str) -> anyhow::Result<Self> {
         let wasm = wit_component::decode(binary)?;
         println!("decoding");
         match wasm {
             DecodedWasm::WitPackage(resolved, id) => {
-                println!("package: {:?}", id);
+                println!("package `{alias}`: {:?}", id);
                 Ok(Self { cache: resolved })
             }
             DecodedWasm::Component(resolved, id) => {
-                println!("world: {:?}", id);
+                println!("world `{alias}`: {:?}", id);
                 Ok(Self { cache: resolved })
             }
         }

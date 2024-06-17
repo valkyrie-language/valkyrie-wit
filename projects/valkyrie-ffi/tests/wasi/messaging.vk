@@ -1,49 +1,49 @@
-⍝? A connection to a message-exchange service (e.g., buffer, broker, etc.).
-#import("wasi:messaging/messaging-types", "client")
+#? A connection to a message-exchange service (e.g., buffer, broker, etc.).
+↯import("wasi:messaging/messaging-types", "client")
 resource class Client {
-    #import("wasi:messaging/messaging-types", "[static]client.connect")
-    connect(name: utf8) -> Result<Client, Error> { }
+    ↯import("wasi:messaging/messaging-types", "[static]client.connect")
+    connect(name: utf8): Result<Client, Error> { }
 
 }
-⍝? TODO(danbugs): This should be eventually extracted as an underlying type for other wasi-cloud-core interfaces.
-#import("wasi:messaging/messaging-types", "error")
+#? TODO(danbugs): This should be eventually extracted as an underlying type for other wasi-cloud-core interfaces.
+↯import("wasi:messaging/messaging-types", "error")
 resource class Error {
-    #import("wasi:messaging/messaging-types", "[static]error.trace")
-    trace() -> utf8 { }
+    ↯import("wasi:messaging/messaging-types", "[static]error.trace")
+    trace(): utf8 { }
 
 }
-⍝? There are two types of channels:
-⍝? - publish-subscribe channel, which is a broadcast channel, and
-⍝? - point-to-point channel, which is a unicast channel.
-⍝? 
-⍝? The interface doesn't highlight this difference in the type itself as that's uniquely a consumer issue.
+#? There are two types of channels:
+#? - publish-subscribe channel, which is a broadcast channel, and
+#? - point-to-point channel, which is a unicast channel.
+#? 
+#? The interface doesn't highlight this difference in the type itself as that's uniquely a consumer issue.
 alias typus Channel = utf8;
-⍝? Configuration includes a required list of channels the guest is subscribing to, and an optional list of extensions key-value pairs
-⍝? (e.g., partitions/offsets to read from in Kafka/EventHubs, QoS etc.).
+#? Configuration includes a required list of channels the guest is subscribing to, and an optional list of extensions key-value pairs
+#? (e.g., partitions/offsets to read from in Kafka/EventHubs, QoS etc.).
 class GuestConfiguration {
     channels: Array<utf8>,
     extensions: Array<(utf8, utf8)>?,
 }
 
-⍝? Format specification for messages
-⍝? - more info: https://github.com/clemensv/spec/blob/registry-extensions/registry/spec.md#message-formats
-⍝? - message metadata can further decorate w/ things like format version, and so on.
-enumerate FormatSpec {
-    #export("cloudevents")
+#? Format specification for messages
+#? - more info: https://github.com/clemensv/spec/blob/registry-extensions/registry/spec.md#message-formats
+#? - message metadata can further decorate w/ things like format version, and so on.
+enums FormatSpec {
+    ↯export("cloudevents")
     Cloudevents,
-    #export("http")
+    ↯export("http")
     Http,
-    #export("amqp")
+    ↯export("amqp")
     Amqp,
-    #export("mqtt")
+    ↯export("mqtt")
     Mqtt,
-    #export("kafka")
+    ↯export("kafka")
     Kafka,
-    #export("raw")
+    ↯export("raw")
     Raw,
 }
 
-⍝? A message with a binary payload, a format specification, and decorative metadata.
+#? A message with a binary payload, a format specification, and decorative metadata.
 class Message {
     data: Array<u8>,
     format: FormatSpec,
@@ -55,51 +55,51 @@ alias typus Message = Message;
 alias typus Channel = utf8;
 alias typus Error = Error;
 alias typus GuestConfiguration = GuestConfiguration;
-⍝? Blocking receive for t-milliseconds with ephemeral subscription – if no message is received, returns None
-#import("wasi:messaging/consumer", "subscribe-try-receive")
-micro subscribe_try_receive(c: Client, ch: utf8, t_milliseconds: u32) -> Result<Array<Message>?, Error> { }
+#? Blocking receive for t-milliseconds with ephemeral subscription – if no message is received, returns None
+↯import("wasi:messaging/consumer", "subscribe-try-receive")
+micro subscribe_try_receive(c: Client, ch: utf8, t_milliseconds: u32): Result<Array<Message>?, Error> { }
 
-⍝? Blocking receive until message with ephemeral subscription
-#import("wasi:messaging/consumer", "subscribe-receive")
-micro subscribe_receive(c: Client, ch: utf8) -> Result<Array<Message>, Error> { }
+#? Blocking receive until message with ephemeral subscription
+↯import("wasi:messaging/consumer", "subscribe-receive")
+micro subscribe_receive(c: Client, ch: utf8): Result<Array<Message>, Error> { }
 
-⍝? 'Fit-all' type function for updating a guest's configuration – this could be useful for:
-⍝? - unsubscribing from a channel,
-⍝? - checkpointing,
-⍝? - etc..
-#import("wasi:messaging/consumer", "update-guest-configuration")
-micro update_guest_configuration(gc: GuestConfiguration) -> Result<(), Error> { }
+#? 'Fit-all' type function for updating a guest's configuration – this could be useful for:
+#? - unsubscribing from a channel,
+#? - checkpointing,
+#? - etc..
+↯import("wasi:messaging/consumer", "update-guest-configuration")
+micro update_guest_configuration(gc: GuestConfiguration): Result<(), Error> { }
 
-⍝? A message can exist under several statuses:
-⍝? (1) available: the message is ready to be read,
-⍝? (2) acquired: the message has been sent to a consumer (but still exists in the queue),
-⍝? (3) accepted (result of complete-message): the message has been received and ACK-ed by a consumer and can be safely removed from the queue,
-⍝? (4) rejected (result of abandon-message): the message has been received and NACK-ed by a consumer, at which point it can be:
-⍝? - deleted,
-⍝? - sent to a dead-letter queue, or
-⍝? - kept in the queue for further processing.
-#import("wasi:messaging/consumer", "complete-message")
-micro complete_message(m: Message) -> Result<(), Error> { }
+#? A message can exist under several statuses:
+#? (1) available: the message is ready to be read,
+#? (2) acquired: the message has been sent to a consumer (but still exists in the queue),
+#? (3) accepted (result of complete-message): the message has been received and ACK-ed by a consumer and can be safely removed from the queue,
+#? (4) rejected (result of abandon-message): the message has been received and NACK-ed by a consumer, at which point it can be:
+#? - deleted,
+#? - sent to a dead-letter queue, or
+#? - kept in the queue for further processing.
+↯import("wasi:messaging/consumer", "complete-message")
+micro complete_message(m: Message): Result<(), Error> { }
 
-#import("wasi:messaging/consumer", "abandon-message")
-micro abandon_message(m: Message) -> Result<(), Error> { }
+↯import("wasi:messaging/consumer", "abandon-message")
+micro abandon_message(m: Message): Result<(), Error> { }
 
 alias typus Message = Message;
 alias typus GuestConfiguration = GuestConfiguration;
 alias typus Error = Error;
-⍝? Returns the list of channels (and extension metadata within guest-configuration) that
-⍝? this component should subscribe to and be handled by the subsequent handler within guest-configuration
-#import("wasi:messaging/messaging-guest", "configure")
-micro configure() -> Result<GuestConfiguration, Error> { }
+#? Returns the list of channels (and extension metadata within guest-configuration) that
+#? this component should subscribe to and be handled by the subsequent handler within guest-configuration
+↯import("wasi:messaging/messaging-guest", "configure")
+micro configure(): Result<GuestConfiguration, Error> { }
 
-⍝? Whenever this guest receives a message in one of the subscribed channels, the message is sent to this handler
-#import("wasi:messaging/messaging-guest", "handler")
-micro handler(ms: Array<Message>) -> Result<(), Error> { }
+#? Whenever this guest receives a message in one of the subscribed channels, the message is sent to this handler
+↯import("wasi:messaging/messaging-guest", "handler")
+micro handler(ms: Array<Message>): Result<(), Error> { }
 
 alias typus Client = Client;
 alias typus Channel = utf8;
 alias typus Message = Message;
 alias typus Error = Error;
-#import("wasi:messaging/producer", "send")
-micro send(c: Client, ch: utf8, m: Array<Message>) -> Result<(), Error> { }
+↯import("wasi:messaging/producer", "send")
+micro send(c: Client, ch: utf8, m: Array<Message>): Result<(), Error> { }
 

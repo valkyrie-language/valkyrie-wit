@@ -8,7 +8,7 @@ impl ValkyrieFFI {
     fn export_resource<'a, W: Write>(&self, file: &mut W, ctx: TypeContext<'a>) -> std::fmt::Result {
         match &ctx.def.name {
             Some(wasi_name) => {
-                writeln!(file, "#import(\"{}\", \"{}\")", ctx.namespace, wasi_name)?;
+                writeln!(file, "↯import(\"{}\", \"{}\")", ctx.namespace, wasi_name)?;
                 writeln!(file, "resource class {} {{", wasi_name.to_case(Case::UpperCamel))?;
                 for function in ctx.interface.functions.values() {
                     function
@@ -85,7 +85,7 @@ impl WriteDefine for Docs {
                     for _ in 0..ctx {
                         w.write_str("    ")?
                     }
-                    writeln!(w, "⍝? {}", line)?
+                    writeln!(w, "#? {}", line)?
                 }
                 Ok(())
             }
@@ -112,10 +112,10 @@ impl WriteDefine for Enum {
 
     fn write_define<'a, W: Write>(&self, w: &mut W, ctx: Self::Context<'a>) -> std::fmt::Result {
         // Name is not required
-        writeln!(w, "enumerate {} {{", ctx.wasi_name.to_case(Case::UpperCamel))?;
+        writeln!(w, "enums {} {{", ctx.wasi_name.to_case(Case::UpperCamel))?;
         for variant in self.cases.iter() {
             variant.docs.write_define(w, 1)?;
-            writeln!(w, "    #export(\"{}\")", variant.name)?;
+            writeln!(w, "    ↯export(\"{}\")", variant.name)?;
             writeln!(w, "    {},", variant.name.to_case(Case::UpperCamel))?;
         }
         w.write_str("}\n\n")
@@ -130,7 +130,7 @@ impl WriteDefine for Flags {
         w.write_str("{\n")?;
         for field in self.flags.iter() {
             field.docs.write_define(w, 1)?;
-            writeln!(w, "    #export(\"{}\")", field.name)?;
+            writeln!(w, "    ↯export(\"{}\")", field.name)?;
             writeln!(w, "    {},", field.name.to_case(Case::Snake))?;
         }
         w.write_str("}\n\n")
@@ -143,7 +143,7 @@ impl WriteDefine for Variant {
         w.write_str("{\n")?;
         for variant in self.cases.iter() {
             variant.docs.write_define(w, 1)?;
-            writeln!(w, "    #export(\"{}\")", variant.name)?;
+            writeln!(w, "    ↯export(\"{}\")", variant.name)?;
             write!(w, "    {}", variant.name.to_case(Case::UpperCamel))?;
             match variant.ty {
                 Some(s) => {
@@ -165,14 +165,14 @@ impl WriteReference for Results {
     fn write_reference<'a, W: Write>(&self, w: &mut W, ctx: Self::Context<'a>) -> std::fmt::Result {
         match self {
             Self::Named(outputs) => {
-                w.write_str(" -> (")?;
+                w.write_str(": (")?;
                 for _ in outputs {
                     unimplemented!()
                 }
                 w.write_str(")")
             }
             Self::Anon(v) => {
-                w.write_str(" -> ")?;
+                w.write_str(": ")?;
                 v.write_reference(w, ctx)
             }
         }

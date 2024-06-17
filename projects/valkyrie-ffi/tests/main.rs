@@ -18,6 +18,6 @@ fn load_deps() {
 fn load_wasm() {
     let here = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests");
     let file = std::fs::read(here.join("host.wasm")).unwrap();
-    let resolved = ValkyrieFFI::new_wasm(&file).unwrap();
+    let resolved = ValkyrieFFI::new_wasm(&file, "homestar").unwrap();
     resolved.generate(here).unwrap();
 }

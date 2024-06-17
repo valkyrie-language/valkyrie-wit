@@ -1,5 +1,3 @@
-namespace host;
-
 class Time {
     seconds: u64,
     milliseconds: u32,
@@ -7,10 +5,10 @@ class Time {
 }
 
 ⍝? Get current time in sub-seconds.
-#import("homestar:host/helpers", "get-current-time")
-micro get_current_time() -> Time {}
+↯import("homestar:host/helpers", "get-current-time")
+micro get_current_time() -> Time { }
 
 ⍝? Basic `print` helper.
-#import("homestar:host/helpers", "print")
-micro print(msg: Utf8Text) -> () {}
+↯import("homestar:host/helpers", "print")
+micro print(msg: utf8) -> () { }
 

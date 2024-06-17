@@ -38,7 +38,7 @@ impl WriteDefine for Function {
 impl ValkyrieFFI {
     fn export_free<W: Write>(&self, function: &Function, namespace: &str, w: &mut W) -> std::fmt::Result {
         function.docs.write_define(w, 0)?;
-        writeln!(w, "#import(\"{}\", \"{}\")", namespace, function.name)?;
+        writeln!(w, "↯import(\"{}\", \"{}\")", namespace, function.name)?;
         write!(w, "micro {}(", function.name.to_case(Case::Snake))?;
         for (i, (key, ty)) in function.params.iter().enumerate() {
             if i != 0 {
@@ -54,7 +54,7 @@ impl ValkyrieFFI {
     fn export_method<W: Write>(&self, function: &Function, head: &str, namespace: &str, w: &mut W) -> std::fmt::Result {
         function.docs.write_define(w, 1)?;
 
-        writeln!(w, "    #import(\"{}\", \"{}\")", namespace, function.name)?;
+        writeln!(w, "    ↯import(\"{}\", \"{}\")", namespace, function.name)?;
         write!(w, "    {}(self", function.name.trim_start_matches(&head).to_case(Case::Snake))?;
         for (key, ty) in function.params.iter().skip(1) {
             write!(w, ", {}: ", self.parameter_name(key))?;
@@ -66,7 +66,7 @@ impl ValkyrieFFI {
     }
     fn export_static<W: Write>(&self, function: &Function, head: &str, namespace: &str, w: &mut W) -> std::fmt::Result {
         function.docs.write_define(w, 1)?;
-        writeln!(w, "    #import(\"{}\", \"{}\")", namespace, function.name)?;
+        writeln!(w, "    ↯import(\"{}\", \"{}\")", namespace, function.name)?;
         write!(w, "    {}(", function.name.trim_start_matches(&head).to_case(Case::Snake))?;
         for (i, (key, ty)) in function.params.iter().enumerate() {
             if i != 0 {

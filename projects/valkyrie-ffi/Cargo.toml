@@ -10,10 +10,10 @@ documentation = "https://docs.rs/valkyrie-ffi"
 license = "MPL-2.0"
 
 [dependencies]
-nyar-wasm = "0.0.6"
+nyar-wasm = "0.0.7"
 anyhow = "1.0.83"
-wit-component = "0.207.0"
-wit-parser = "0.207.0"
+wit-component = "0.208.1"
+wit-parser = "0.208.1"
 tracing = "0.1.40"
 convert_case = "0.6.0"
 

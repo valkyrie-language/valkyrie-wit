@@ -13,6 +13,6 @@ enumerate Level {
     Critical,
 }
 
-#import("wasi:logging/logging", "log")
+↯import("wasi:logging/logging", "log")
 micro log(level: Level, context: utf8, message: utf8) -> () { }
 

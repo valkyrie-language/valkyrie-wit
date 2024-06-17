@@ -1,99 +1,99 @@
-⍝? common data types
+#? common data types
 unite DataType {
-    #export("int32")
+    ↯export("int32")
     Int32 {
         value: i32
     },
-    #export("int64")
+    ↯export("int64")
     Int64 {
         value: i64
     },
-    #export("uint32")
+    ↯export("uint32")
     Uint32 {
         value: u32
     },
-    #export("uint64")
+    ↯export("uint64")
     Uint64 {
         value: u64
     },
-    #export("float")
+    ↯export("float")
     Float {
         value: f64
     },
-    #export("double")
+    ↯export("double")
     Double {
         value: f64
     },
-    #export("str")
+    ↯export("str")
     Str {
         value: utf8
     },
-    #export("boolean")
+    ↯export("boolean")
     Boolean {
         value: bool
     },
-    #export("date")
+    ↯export("date")
     Date {
         value: utf8
     },
-    #export("time")
+    ↯export("time")
     Time {
         value: utf8
     },
-    #export("timestamp")
+    ↯export("timestamp")
     Timestamp {
         value: utf8
     },
-    #export("binary")
+    ↯export("binary")
     Binary {
         value: Array<u8>
     },
-    #export("null")
+    ↯export("null")
     Null,
 }
 
-⍝? one single row item
+#? one single row item
 class Row {
     field_name: utf8,
     value: DataType,
 }
 
-⍝? allows parameterized queries
-⍝? e.g., prepare("SELECT * FROM users WHERE name = ? AND age = ?", vec!["John Doe", "32"])
-#import("wasi:sql/types", "statement")
+#? allows parameterized queries
+#? e.g., prepare("SELECT * FROM users WHERE name = ? AND age = ?", vec!["John Doe", "32"])
+↯import("wasi:sql/types", "statement")
 resource class Statement {
-    #import("wasi:sql/types", "[static]statement.prepare")
-    prepare(query: utf8, params: Array<utf8>) -> Result<Statement, Error> { }
+    ↯import("wasi:sql/types", "[static]statement.prepare")
+    prepare(query: utf8, params: Array<utf8>): Result<Statement, Error> { }
 
 }
-⍝? An error resource type.
-⍝? Currently, this provides only one function to return a string representation
-⍝? of the error. In the future, this will be extended to provide more information.
-#import("wasi:sql/types", "error")
+#? An error resource type.
+#? Currently, this provides only one function to return a string representation
+#? of the error. In the future, this will be extended to provide more information.
+↯import("wasi:sql/types", "error")
 resource class Error {
-    #import("wasi:sql/types", "[method]error.trace")
-    trace(self) -> utf8 { }
+    ↯import("wasi:sql/types", "[method]error.trace")
+    trace(self): utf8 { }
 
 }
-⍝? A connection to a sql store.
-#import("wasi:sql/types", "connection")
+#? A connection to a sql store.
+↯import("wasi:sql/types", "connection")
 resource class Connection {
-    #import("wasi:sql/types", "[static]connection.open")
-    open(name: utf8) -> Result<Connection, Error> { }
+    ↯import("wasi:sql/types", "[static]connection.open")
+    open(name: utf8): Result<Connection, Error> { }
 
 }
 alias typus Statement = Statement;
 alias typus Row = Row;
 alias typus Error = Error;
 alias typus Connection = Connection;
-⍝? query is optimized for querying data, and
-⍝? implementors can make use of that fact to optimize
-⍝? the performance of query execution (e.g., using
-⍝? indexes).
-#import("wasi:sql/readwrite", "query")
-micro query(c: &Connection, q: &Statement) -> Result<Array<Row>, Error> { }
+#? query is optimized for querying data, and
+#? implementors can make use of that fact to optimize
+#? the performance of query execution (e.g., using
+#? indexes).
+↯import("wasi:sql/readwrite", "query")
+micro query(c: &Connection, q: &Statement): Result<Array<Row>, Error> { }
 
-⍝? exec is for modifying data in the database.
-#import("wasi:sql/readwrite", "exec")
-micro exec(c: &Connection, q: &Statement) -> Result<u32, Error> { }
+#? exec is for modifying data in the database.
+↯import("wasi:sql/readwrite", "exec")
+micro exec(c: &Connection, q: &Statement): Result<u32, Error> { }
 
